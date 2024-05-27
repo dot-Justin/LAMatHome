@@ -10,9 +10,7 @@ This program locally runs playwright to constantly refresh hole.rabbit.tech, loo
 **Example:**
 Telegram *[Person] [Message]*
 
-"Telegram Arthur: What's up?" 
-
-This logs into Telegram, searches "@Arthur", clicks on topmost chat fitting the name, then sends a message with the remainder of the content from the prompt.
+**"Telegram Arthur: What's up?"** will search telegram for `@Arthur`, click on the topmost profile, then send a message saying `"What's up?"`.
 
 ## 🌐 Current Integrations:
 ### Telegram:
@@ -22,12 +20,17 @@ This logs into Telegram, searches "@Arthur", clicks on topmost chat fitting the 
 
 **Tips**: There is a chance that you will be sending messages to random people. This is a result of the way telegram search works. The first word of your prompt needs to be "Telegram" for this to work.  If your r1 decides to save as a note, this will not work, try 5xptt and give your prompt again.
 
-## 👨‍💻 Installation
+## 👨‍💻 Installation & Usage
 
 ```
 git clone https://github.com/dot-Justin/LAMAtHome
 pip install -r requirements.txt
 playwright install
+```
+
+Add your credentials to `.env`
+
+```
 py main.py
 ```
 ## 🔥Acknowledgements

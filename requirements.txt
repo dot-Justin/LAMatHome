@@ -1,0 +1,3 @@
+playwright
+python-dotenv
+coloredlogs

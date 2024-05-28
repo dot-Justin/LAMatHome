@@ -338,7 +338,7 @@ def main():
             json.dump({}, f)
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False)  # Do not change, breaks script
+        browser = p.firefox.launch(headless=True)  # No longer breaks script! If you want to see LAMAtHome work through GUI's, set to False.
         context = browser.new_context(storage_state=state_file)
         page = context.new_page()
 

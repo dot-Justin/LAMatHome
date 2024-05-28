@@ -19,7 +19,13 @@ import urllib.parse
 # Example: "Computer Google What is the meaning of life"    #
 #############################################################
 
+computer_isenabled = False
+
 def ComputerParse(browser, title):
+    if not computer_isenabled:
+        log_disabled_integration("Computer")
+        return
+
     words = title.split()
     if len(words) < 3:
         logging.error("Invalid prompt format for Computer command.")
@@ -27,16 +33,28 @@ def ComputerParse(browser, title):
 
     second_word = words[1].strip('.,!?:;').lower()
     if second_word == "google":
-        ComputerGoogle(title)
+        if computergoogle_isenabled:
+            ComputerGoogle(title)
+        else:
+            log_disabled_integration("ComputerGoogle")
     elif second_word == "youtube":
-        ComputerYoutube(title)
+        if computeryoutube_isenabled:
+            ComputerYoutube(title)
+        else:
+            log_disabled_integration("ComputerYoutube")
     else:
-        logging.error("Unknown Computer command.")
+        logging.error("Unknown Computer command or the integration is not enabled.")
 
 ############################
 #      ComputerGoogle      #
 ############################
+
+computergoogle_isenabled = True
+
 def ComputerGoogle(title):
+    if not computergoogle_isenabled:
+        return
+
     words = title.split()
     if len(words) < 3:
         logging.error("Invalid prompt format for Computer Google command.")
@@ -58,7 +76,13 @@ def ComputerGoogle(title):
 ############################
 #      ComputerYoutube     #
 ############################
+
+computeryoutube_isenabled = True
+
 def ComputerYoutube(title):
+    if not computeryoutube_isenabled:
+        return
+
     words = title.split()
     if len(words) < 3:
         logging.error("Invalid prompt format for Computer Youtube command.")
@@ -77,7 +101,6 @@ def ComputerYoutube(title):
     webbrowser.open(url)
     logging.info(f"Opened YouTube search for query: {query}")
 
-
 #############################################################
 #                                                           #
 #                          Telegram:                        #
@@ -88,18 +111,33 @@ def ComputerYoutube(title):
 # Example: "Telegram Justin Why are you so cool?"           #
 #############################################################
 
+telegram_isenabled = True
+
 def TelegramParse(browser, title):
+    if not telegram_isenabled:
+        log_disabled_integration("Telegram")
+        return
+
     words = title.split()
     if len(words) < 3:
         logging.error("Invalid prompt format for Telegram command.")
         return
 
-    TelegramText(browser, title)
+    if telegramtext_isenabled:
+        TelegramText(browser, title)
+    else:
+        log_disabled_integration("TelegramText")
 
 ##########################
 #      TelegramText      #
 ##########################
+
+telegramtext_isenabled = True
+
 def TelegramText(browser, title):
+    if not telegramtext_isenabled:
+        return
+
     session_file = "sessions/telegram_state.json"
     os.makedirs("sessions", exist_ok=True)
 
@@ -163,7 +201,9 @@ def TelegramText(browser, title):
     context.storage_state(path=session_file)  # Save session at the end
     context.close()
 
+
 #----------------------------------------------------------------------------------------------------------------------------------#
+
 
 ################################
 #            Logging           #
@@ -173,6 +213,9 @@ def TelegramText(browser, title):
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 coloredlogs.install(level='INFO', fmt='%(asctime)s - %(levelname)s - %(message)s')
+
+def log_disabled_integration(integration_name):
+    logging.info(f"Attempted to call {integration_name}, but it is disabled.")
 
 # Load environment variables
 load_dotenv()
@@ -288,12 +331,18 @@ def main():
 
                 # First word = 'telegram', call TelegramParse function
                 if re.match(r'^[a-z]+$', first_word) and first_word == "telegram":
-                    logging.info(f"Calling Telegram function with title: {title}")
-                    TelegramParse(browser, title)
+                    if telegram_isenabled:
+                        logging.info(f"Calling Telegram function with title: {title}")
+                        TelegramParse(browser, title)
+                    else:
+                        log_disabled_integration("Telegram")
                 # First word = 'computer', call ComputerParse function
                 elif re.match(r'^[a-z]+$', first_word) and first_word == "computer":
-                    logging.info(f"Calling Computer function with title: {title}")
-                    ComputerParse(browser, title)
+                    if computer_isenabled:
+                        logging.info(f"Calling Computer function with title: {title}")
+                        ComputerParse(browser, title)
+                    else:
+                        log_disabled_integration("Computer")
 
 if __name__ == "__main__":
     main()

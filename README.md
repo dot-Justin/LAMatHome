@@ -56,6 +56,18 @@ This program locally runs Playwright to constantly refresh hole.rabbit.tech, loo
     py main.py
     ```
 
+## ⚙️ Configuration
+
+LAMAtHome runs off groups of functions, called Integrations. By default, every integration is enabled, however each integration, as well as its child functions, can be disabled. Follow these steps to do so:
+- Disable entire Integrations (Computer, Telegram, etc.)
+    1. Open `main.py`
+    2. Scroll to the Integration you want to disable (marked by a wall of comments, including the name. Or, search for the function name.)
+    3. Find the line where it says `integrationname_isenabled=True` and change to `integrationname_isenabled=False`
+
+- Disable only certain functions (ComputerGoogle, TelegramText, etc)
+    1. Find the function you want to disable
+    2. Follow the same steps as above.
+
 ## 🔥 Acknowledgements
 - Thanks to poke for the original idea [rabbitWrighter](https://github.com/glovergaytan-fs/rabbitWrighter/tree/main)
 - Obligatory "There's no way you're that young" [rabbitt](https://github.com/GikitSRC/rabbitt)

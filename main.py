@@ -48,12 +48,18 @@ def ComputerParse(browser, title):
         else:
             log_disabled_integration("ComputerGmail")
     elif second_word == "amazon":
-        if computergmail_isenabled:
-            ComputerGmail(title)
+        if computeramazon_isenabled:
+            ComputerAmazon(title)
         else:
             log_disabled_integration("ComputerAmazon")
+    elif second_word == "volume":
+        if computervolume_isenabled:
+            ComputerVolume(title)
+        else:
+            log_disabled_integration("ComputerVolume")
     else:
         logging.error("Unknown Computer command or the integration is not enabled.")
+
 
 ############################
 #      ComputerGoogle      #
@@ -145,7 +151,7 @@ def ComputerGmail(title):
 
 computeramazon_isenabled = True
 
-def ComputerGmail(title):
+def ComputerAmazon(title):
     if not computeramazon_isenabled:
         return
 
@@ -166,6 +172,97 @@ def ComputerGmail(title):
     # Open the URL in the default web browser
     webbrowser.open(url)
     logging.info(f"Opened Amazon search for query: {query}")
+
+# Computer Searches ^
+# ----------------------------------------------------------#
+# Computer Settings v
+
+############################
+#      ComputerVolume      #
+############################
+
+computervolume_isenabled = True
+
+# These control how much audio gets turned up or down on "computer volume up/down".
+vol_up_step_value = 4
+vol_down_step_value = 4
+
+def ComputerVolume(title):
+    if not computervolume_isenabled:
+        log_disabled_integration("ComputerVolume")
+        return
+
+    import re
+    import ctypes
+
+    # Remove punctuation and convert words to lowercase
+    title_cleaned = re.sub(r'[^\w\s]', '', title).lower()
+
+    words = title_cleaned.split()
+    if len(words) < 3:
+        logging.error("Invalid prompt format for Computer Volume command.")
+        return
+
+    # Try to interpret the volume value
+    volume_word = words[2]
+    
+    if volume_word == "mute":
+        try:
+            ctypes.windll.user32.keybd_event(0xAD, 0, 0, 0)  # Mute the volume
+            logging.info("Muted the volume")
+        except Exception as e:
+            logging.error(f"Failed to mute volume: {e}")
+        return
+
+    if volume_word == "unmute":
+        try:
+            ctypes.windll.user32.keybd_event(0xAD, 0, 0, 0)  # Unmute the volume
+            logging.info("Unmuted the volume")
+        except Exception as e:
+            logging.error(f"Failed to unmute volume: {e}")
+        return
+
+    if volume_word == "up":
+        try:
+            for _ in range(vol_up_step_value):
+                ctypes.windll.user32.keybd_event(0xAF, 0, 0, 0)
+                ctypes.windll.user32.keybd_event(0xAF, 0, 2, 0)
+            logging.info(f"Increased volume by {vol_up_step_value} steps")
+        except Exception as e:
+            logging.error(f"Failed to increase volume: {e}")
+        return
+
+    if volume_word == "down":
+        try:
+            for _ in range(vol_down_step_value):
+                ctypes.windll.user32.keybd_event(0xAE, 0, 0, 0)
+                ctypes.windll.user32.keybd_event(0xAE, 0, 2, 0)
+            logging.info(f"Decreased volume by {vol_down_step_value} steps")
+        except Exception as e:
+            logging.error(f"Failed to decrease volume: {e}")
+        return
+
+    try:
+        volume_value = int(volume_word)
+        if volume_value < 0 or volume_value > 100:
+            raise ValueError
+    except ValueError:
+        logging.error(f"Invalid volume value: {volume_word}. Must be an integer between 0 and 100.")
+        return
+
+    # Set the volume (looking for other ways, emulates a keybind for volume down (all the way) then up to specified percent.)
+    try:
+        for _ in range(50):  # Set volume to 0
+            ctypes.windll.user32.keybd_event(0xAE, 0, 0, 0)
+            ctypes.windll.user32.keybd_event(0xAE, 0, 2, 0)
+        for _ in range(volume_value // 2):  # Increase to desired volume
+            ctypes.windll.user32.keybd_event(0xAF, 0, 0, 0)
+            ctypes.windll.user32.keybd_event(0xAF, 0, 2, 0)
+        logging.info(f"Set volume to {volume_value}%")
+    except Exception as e:
+        logging.error(f"Failed to set volume: {e}")
+
+
 
 #############################################################
 #                                                           #
@@ -338,7 +435,7 @@ def main():
             json.dump({}, f)
 
     with sync_playwright() as p:
-        browser = p.firefox.launch(headless=True)  # No longer breaks script! If you want to see LAMAtHome work through GUI's, set to False.
+        browser = p.firefox.launch(headless=False)  # No longer breaks script! If you want to see LAMAtHome work through GUI's, set to False.
         context = browser.new_context(storage_state=state_file)
         page = context.new_page()
 

@@ -15,9 +15,11 @@ This program locally runs Playwright to constantly refresh hole.rabbit.tech, loo
 |------------|--------------------------------------------------|---------------------------------|-----------------------------------------------------------|
 | **Google** | Performs a Google search for the provided query. | `"Computer Google [search query]"` | `"Computer Google What is the meaning of life?"`          |
 | **YouTube**| Performs a YouTube search for the provided query.| `"Computer YouTube [search query]"`| `"Computer YouTube How to bake a cake"`                    |
+| **Gmail**| Performs a Gmail search for the provided query.| `"Computer Gmail [search query]"`| `"Computer Gmail AI"`                    |
+| **Amazon**| Performs an Amazon search for the provided query.| `"Computer Amazon [search query]"`| `"Computer Amazon Men's socks"`                    |
 
 **Setup**: 
-- No setup required!
+- Set your default browser in Windows Settings > Apps > Default apps
 
 ### 💬 Telegram
 **Syntax**: `"Telegram [User] [Message content]"` (Working on more telegram functionality)

@@ -19,7 +19,7 @@ import urllib.parse
 # Example: "Computer Google What is the meaning of life"    #
 #############################################################
 
-computer_isenabled = False
+computer_isenabled = True
 
 def ComputerParse(browser, title):
     if not computer_isenabled:
@@ -42,6 +42,16 @@ def ComputerParse(browser, title):
             ComputerYoutube(title)
         else:
             log_disabled_integration("ComputerYoutube")
+    elif second_word == "gmail":
+        if computergmail_isenabled:
+            ComputerGmail(title)
+        else:
+            log_disabled_integration("ComputerGmail")
+    elif second_word == "amazon":
+        if computergmail_isenabled:
+            ComputerGmail(title)
+        else:
+            log_disabled_integration("ComputerAmazon")
     else:
         logging.error("Unknown Computer command or the integration is not enabled.")
 
@@ -100,6 +110,62 @@ def ComputerYoutube(title):
     # Open the URL in the default web browser
     webbrowser.open(url)
     logging.info(f"Opened YouTube search for query: {query}")
+
+##########################
+#      ComputerGmail     #
+##########################
+
+computergmail_isenabled = True
+
+def ComputerGmail(title):
+    if not computergmail_isenabled:
+        return
+
+    words = title.split()
+    if len(words) < 3:
+        logging.error("Invalid prompt format for Computer Gmail command.")
+        return
+
+    # Strip punctuation from the first and second words
+    first_word = words[0].strip('.,!?:;')
+    second_word = words[1].strip('.,!?:;')
+
+    # Join the remaining words to form the query
+    query = " ".join(words[2:])
+    encoded_query = urllib.parse.quote(query)
+    url = f"https://mail.google.com/mail/u/0/#search/{encoded_query}"
+
+    # Open the URL in the default web browser
+    webbrowser.open(url)
+    logging.info(f"Opened Gmail search for query: {query}")
+
+###########################
+#      ComputerAmazon     #
+###########################
+
+computeramazon_isenabled = True
+
+def ComputerGmail(title):
+    if not computeramazon_isenabled:
+        return
+
+    words = title.split()
+    if len(words) < 3:
+        logging.error("Invalid prompt format for Computer Amazon command.")
+        return
+
+    # Strip punctuation from the first and second words
+    first_word = words[0].strip('.,!?:;')
+    second_word = words[1].strip('.,!?:;')
+
+    # Join the remaining words to form the query
+    query = " ".join(words[2:])
+    encoded_query = urllib.parse.quote(query)
+    url = f"https://www.amazon.com/s?k={encoded_query}"
+
+    # Open the URL in the default web browser
+    webbrowser.open(url)
+    logging.info(f"Opened Amazon search for query: {query}")
 
 #############################################################
 #                                                           #

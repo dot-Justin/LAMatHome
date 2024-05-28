@@ -6,12 +6,100 @@ import logging
 import coloredlogs
 from dotenv import load_dotenv
 from playwright.sync_api import sync_playwright
+import webbrowser
+import urllib.parse
 
-####################################
-##      Telegram Integration      ##
-####################################
+#############################################################
+#                                                           #
+#                          Computer:                        #
+#                                                           #
+#############################################################
+# Computer Integration                                      #
+# Syntax: "Computer [Function] [query]"                     #
+# Example: "Computer Google What is the meaning of life"    #
+#############################################################
 
-def Telegram(browser, title):
+def ComputerParse(browser, title):
+    words = title.split()
+    if len(words) < 3:
+        logging.error("Invalid prompt format for Computer command.")
+        return
+
+    second_word = words[1].strip('.,!?:;').lower()
+    if second_word == "google":
+        ComputerGoogle(title)
+    elif second_word == "youtube":
+        ComputerYoutube(title)
+    else:
+        logging.error("Unknown Computer command.")
+
+############################
+#      ComputerGoogle      #
+############################
+def ComputerGoogle(title):
+    words = title.split()
+    if len(words) < 3:
+        logging.error("Invalid prompt format for Computer Google command.")
+        return
+
+    # Strip punctuation from the first and second words
+    first_word = words[0].strip('.,!?:;')
+    second_word = words[1].strip('.,!?:;')
+
+    # Join the remaining words to form the query
+    query = " ".join(words[2:])
+    encoded_query = urllib.parse.quote(query)
+    url = f"https://www.google.com/search?q={encoded_query}"
+
+    # Open the URL in the default web browser
+    webbrowser.open(url)
+    logging.info(f"Opened Google search for query: {query}")
+
+############################
+#      ComputerYoutube     #
+############################
+def ComputerYoutube(title):
+    words = title.split()
+    if len(words) < 3:
+        logging.error("Invalid prompt format for Computer Youtube command.")
+        return
+
+    # Strip punctuation from the first and second words
+    first_word = words[0].strip('.,!?:;')
+    second_word = words[1].strip('.,!?:;')
+
+    # Join the remaining words to form the query
+    query = " ".join(words[2:])
+    encoded_query = urllib.parse.quote(query)
+    url = f"https://www.youtube.com/results?search_query={encoded_query}"
+
+    # Open the URL in the default web browser
+    webbrowser.open(url)
+    logging.info(f"Opened YouTube search for query: {query}")
+
+
+#############################################################
+#                                                           #
+#                          Telegram:                        #
+#                                                           #
+#############################################################
+# Telegram Integration                                      #
+# Syntax: "Telegram [user] [rest of prompt is message]"     #
+# Example: "Telegram Justin Why are you so cool?"           #
+#############################################################
+
+def TelegramParse(browser, title):
+    words = title.split()
+    if len(words) < 3:
+        logging.error("Invalid prompt format for Telegram command.")
+        return
+
+    TelegramText(browser, title)
+
+##########################
+#      TelegramText      #
+##########################
+def TelegramText(browser, title):
     session_file = "sessions/telegram_state.json"
     os.makedirs("sessions", exist_ok=True)
 
@@ -75,10 +163,11 @@ def Telegram(browser, title):
     context.storage_state(path=session_file)  # Save session at the end
     context.close()
 
+#----------------------------------------------------------------------------------------------------------------------------------#
 
 ################################
-##           Logging          ##
-##        Env Variables       ##
+#            Logging           #
+#         Env Variables        #
 ################################
 
 # Set up logging
@@ -96,7 +185,7 @@ if not RH_EMAIL or not RH_PASS:
     exit(1)
 
 ##############################
-##        Database          ##
+#         Database           #
 ##############################
 
 def init_db():
@@ -122,12 +211,14 @@ def save_entry(title, date, time):
     conn.commit()
     conn.close()
 
-##############################
-##            Main          ##
-##############################
+#########################################################
+#                                                       #
+#                          Main:                        #
+#                                                       #
+#########################################################
 
 def main():
-    init_db()
+    init_db() #initialize database
 
     state_file = "sessions/rabbithole_state.json"
     os.makedirs("sessions", exist_ok=True)
@@ -191,14 +282,18 @@ def main():
                 save_entry(title, date, time)
                 logging.info(f"Saved entry: {title}, {date}, {time}")
                 # New entry detected, so below regex check the new entry's context and see if we want to do anything with it
-
-
-                #First word = 'telegram', call telegram function
                 first_word = title.split()[0].strip().lower().strip('.,!?:;')
-                logging.info(f"First word of title: {first_word}")
+
+                logging.info(f"First word of title: {first_word}") # log first word (potential action) to terminal
+
+                # First word = 'telegram', call TelegramParse function
                 if re.match(r'^[a-z]+$', first_word) and first_word == "telegram":
                     logging.info(f"Calling Telegram function with title: {title}")
-                    Telegram(browser, title)
+                    TelegramParse(browser, title)
+                # First word = 'computer', call ComputerParse function
+                elif re.match(r'^[a-z]+$', first_word) and first_word == "computer":
+                    logging.info(f"Calling Computer function with title: {title}")
+                    ComputerParse(browser, title)
 
 if __name__ == "__main__":
     main()

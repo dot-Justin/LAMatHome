@@ -11,13 +11,13 @@ This program locally runs Playwright to constantly refresh hole.rabbit.tech, loo
 ### 💻 Computer
 
 **Syntax**: `"Computer [Function] [Query]"`
-| Function   | Description                                      | Syntax                          | Example                                                   |
-|------------|--------------------------------------------------|---------------------------------|-----------------------------------------------------------|
-| ⚙️**Volume**| Sets computer volume| `"Computer Volume [number(1-100)\|up\|down\|mute\|unmute]"`| `"Computer Volume 30 \| Computer volume down"`                    |
-| 🔎**Google** | Performs a Google search for the provided query. | `"Computer Google [search query]"` | `"Computer Google What is the meaning of life?"`          |
-| 🔎**YouTube**| Performs a YouTube search for the provided query.| `"Computer YouTube [search query]"`| `"Computer YouTube How to bake a cake"`                    |
-| 🔎**Gmail**| Performs a Gmail search for the provided query.| `"Computer Gmail [search query]"`| `"Computer Gmail AI"`                    |
-| 🔎**Amazon**| Performs an Amazon search for the provided query.| `"Computer Amazon [search query]"`| `"Computer Amazon Men's socks"`                    |
+|| Function | Description | Syntax | Example |
+|-|-|-|-|-|
+|🔎| **Google** | Performs a Google search for the provided query. | `"Computer Google [search query]"` | `"Computer Google What is the meaning of life?"`|
+|🔎| **YouTube** | Performs a YouTube search for the provided query.| `"Computer YouTube [search query]"`| `"Computer YouTube How to bake a cake"`|
+|🔎| **Gmail** | Performs a Gmail search for the provided query.| `"Computer Gmail [search query]"`| `"Computer Gmail AI"`|
+|🔎| **Amazon** | Performs an Amazon search for the provided query.| `"Computer Amazon [search query]"`| `"Computer Amazon Men's socks"`|
+|⚙️| **Volume** | Sets computer volume| `"Computer Volume [1-100\|up\|down\|mute\|unmute]"`| `"Computer Volume 30 \| Computer volume down"`|
 
 
 **Setup**: 
@@ -26,9 +26,9 @@ This program locally runs Playwright to constantly refresh hole.rabbit.tech, loo
 ### 💬 Telegram
 **Syntax**: `"Telegram [User] [Message content]"` (Working on more telegram functionality)
 
-| Function    | Description                           | Syntax                             | Example                         |
-|-------------|---------------------------------------|-------------------------------------|---------------------------------|
-| 💬**Telegram**| Messages a specified user on Telegram.| `"Telegram [Name (one word)] [Message]"` | `"Telegram Arthur What's up?"` |
+|| Function | Description | Syntax | Example |
+|-|-|-|-|-|
+|💬| **Telegram** | Messages a specified user on Telegram. | `"Telegram [Name (one word)] [Message]"` | `"Telegram Arthur What's up?"`|
 
 **Setup**:
 1. For first time setup and login to telegram, you will need to run the program in headful mode.
@@ -39,7 +39,6 @@ This program locally runs Playwright to constantly refresh hole.rabbit.tech, loo
 
 **Tips**:
 - There is a chance that you will be sending messages to random people. This is a result of the way Telegram search works.
-- The first word of your prompt needs to be "Telegram" for this to work.
 - If your entry decides to save as a note, this will not work, try to 5xptt and give your prompt again.
 
 ## 👨‍💻 Installation & Usage
@@ -64,15 +63,44 @@ This program locally runs Playwright to constantly refresh hole.rabbit.tech, loo
 
 ## ⚙️ Configuration
 
-LAMAtHome runs off groups of functions, called Integrations. By default, every integration is enabled, however each integration, as well as its child functions, can be disabled. Follow these steps to do so:
-- Disable entire Integrations (Computer, Telegram, etc.)
-    1. Open `main.py`
-    2. Scroll to the Integration you want to disable (marked by a wall of comments, including the name. Or, search for the function name.)
-    3. Find the line where it says `integrationname_isenabled=True` and change to `integrationname_isenabled=False`
+LAMAtHome uses groups of functions called Integrations. By default, every integration and its functions are enabled. In the examples below, notice the difference in the way they are announced. Integrations have large blocks of comments, and functions have small ones. You can disable entire integrations or specific functions by following these steps:
 
-- Disable only certain functions (ComputerGoogle, TelegramText, etc)
-    1. Find the function you want to disable
-    2. Follow the same steps as above.
+### 🟦 Disable Entire Integrations (Computer, Telegram, etc.)
+1. Go to the `/integrations/` directory and open the file for the integration you want to configure (e.g., `computer.py`, `telegram.py`).
+2. At the top of the file, locate the line that says `integrationname_isenabled=True` and change it to `integrationname_isenabled=False`.
+
+    - Note: Disabling an integration with the same name as the file will disable the entire integration.
+
+Example:
+
+```
+#############################################################
+#                                                           #
+#                          Computer:                        #
+#                                                           #
+#############################################################
+
+# (set to False to disable entire integration)
+computer_isenabled = True
+```
+
+### ⏹️ Disable Specific Functions (ComputerGoogle, TelegramText, etc.)
+1. Open the file for the integration under `/integrations/` where the function is defined.
+2. Scroll to the function you want to disable (each function is marked by a block comment with its name, or you can search for the function name).
+3. Locate the line that says `functionname_isenabled=True` and change it to `functionname_isenabled=False`.
+
+Example:
+
+```
+############################
+#      ComputerVolume      #
+############################
+
+# (set to False to disable)
+computervolume_isenabled = True
+```
+
+By following these steps, you can easily customize which integrations and functions are enabled or disabled in LAMAtHome.
 
 ## 🔥 Acknowledgements
 - Thanks to poke for the original idea [rabbitWrighter](https://github.com/glovergaytan-fs/rabbitWrighter/tree/main)

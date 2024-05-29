@@ -9,14 +9,16 @@ This program locally runs Playwright to constantly refresh hole.rabbit.tech, loo
 ## 🌐 Integrations
 
 ### 💻 Computer
-**Syntax**: `"Computer [Function] [Query]"`
 
+**Syntax**: `"Computer [Function] [Query]"`
 | Function   | Description                                      | Syntax                          | Example                                                   |
 |------------|--------------------------------------------------|---------------------------------|-----------------------------------------------------------|
-| **Google** | Performs a Google search for the provided query. | `"Computer Google [search query]"` | `"Computer Google What is the meaning of life?"`          |
-| **YouTube**| Performs a YouTube search for the provided query.| `"Computer YouTube [search query]"`| `"Computer YouTube How to bake a cake"`                    |
-| **Gmail**| Performs a Gmail search for the provided query.| `"Computer Gmail [search query]"`| `"Computer Gmail AI"`                    |
-| **Amazon**| Performs an Amazon search for the provided query.| `"Computer Amazon [search query]"`| `"Computer Amazon Men's socks"`                    |
+| ⚙️**Volume**| Sets computer volume| `"Computer Volume [number(1-100)\|up\|down\|mute\|unmute]"`| `"Computer Volume 30 \| Computer volume down"`                    |
+| 🔎**Google** | Performs a Google search for the provided query. | `"Computer Google [search query]"` | `"Computer Google What is the meaning of life?"`          |
+| 🔎**YouTube**| Performs a YouTube search for the provided query.| `"Computer YouTube [search query]"`| `"Computer YouTube How to bake a cake"`                    |
+| 🔎**Gmail**| Performs a Gmail search for the provided query.| `"Computer Gmail [search query]"`| `"Computer Gmail AI"`                    |
+| 🔎**Amazon**| Performs an Amazon search for the provided query.| `"Computer Amazon [search query]"`| `"Computer Amazon Men's socks"`                    |
+
 
 **Setup**: 
 - Set your default browser in Windows Settings > Apps > Default apps
@@ -26,10 +28,12 @@ This program locally runs Playwright to constantly refresh hole.rabbit.tech, loo
 
 | Function    | Description                           | Syntax                             | Example                         |
 |-------------|---------------------------------------|-------------------------------------|---------------------------------|
-| **Telegram**| Messages a specified user on Telegram.| `"Telegram [Name (one word)] [Message]"` | `"Telegram Arthur What's up?"` |
+| 💬**Telegram**| Messages a specified user on Telegram.| `"Telegram [Name (one word)] [Message]"` | `"Telegram Arthur What's up?"` |
 
 **Setup**:
-1. If a Telegram prompt is detected, Playwright will open up a Telegram window with a QR code.
+1. For first time setup and login to telegram, you will need to run the program in headful mode.
+    - This can be done in `main.py`, under the main function. Search for "headless=" and ensure that it's set to ""
+2. If a Telegram prompt is detected, Playwright will open up a Telegram window with a QR code.
     - Head to the Telegram app on your phone, tap the hamburger menu at the top left, tap `Settings` > `Devices` > `Link Desktop Device`, and scan the QR code.
     - If you get an error like "Expired", manually refresh the Telegram QR page. Your session will be saved so it will be rare that you need to do this.
 

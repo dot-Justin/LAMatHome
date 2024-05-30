@@ -1,16 +1,22 @@
+from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
 import os
 import json
 import logging
 import re
+from datetime import datetime
 import coloredlogs
-from dotenv import load_dotenv
-from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
 from integrations.computer import ComputerParse, computer_isenabled
 from integrations.telegram import TelegramParse, telegram_isenabled
 from utils.database import init_db, entry_exists, save_entry
 from utils.helpers import log_disabled_integration
 from utils.get_env import RH_EMAIL, RH_PASS
+from integrations.discord import login_discord, send_discord_message
+from integrations.facebook import open_facebook_messenger
+from integrations.rabbithole import login_hole_rabbit
+from integrations.parse import CombinedParse
+from dotenv import load_dotenv
 
+# --- Main execution ---
 def main():
     init_db()  # Initialize database
 
@@ -23,89 +29,81 @@ def main():
             json.dump({}, f)
 
     with sync_playwright() as p:
-        browser = p.firefox.launch(headless=True)  # Launch Firefox, because Chrome is too mainstream (jk, it helps stability.) After your initial run (and you get logged into telegram), this can be set to True and you won't see LAH working!
-        context = browser.new_context(storage_state=state_file) # Use state to stay logged in
-        page = context.new_page() # Open a new page
+        browser = p.firefox.launch(headless=False)  # Launch Firefox
+        context = browser.new_context(storage_state=state_file)  # Use state to stay logged in
+        page = context.new_page()  # Open a new page
 
         # Block unnecessary resources but allow CSS
         page.route("**/*", lambda route, request: route.continue_() if request.resource_type in ["document", "script", "xhr", "fetch", "stylesheet"] else route.abort())
 
-        page.goto("https://hole.rabbit.tech")
-        if not page.is_visible('input#username'):
-            logging.info("Already logged in.")  # we already logged in, life good
-        else:
-            page.wait_for_selector('input#username', timeout=30000)
-            page.fill('input#username', RH_EMAIL)
-            page.wait_for_selector('input#password', timeout=30000)
-            page.fill('input#password', RH_PASS)
-            page.click('button[type="submit"][data-action-button-primary="true"]')
-            page.wait_for_load_state('networkidle')  # Wait until network is idle
-            context.storage_state(path=state_file)
+        # --- Login to hole.rabbit.tech ---
+        login_hole_rabbit(page)
 
+        previous_text_content = ''
         while True:
-            page.goto("https://hole.rabbit.tech/journal/details") # Go to the journal details page
-            page.wait_for_selector('.w-full:nth-child(2) > .mb-8 li', timeout=15000)  # Wait for specific element
+            if not page.is_closed():
+                # try:
+                page.goto('https://hole.rabbit.tech/journal/details')
+                page.wait_for_load_state('load')
+                first_item = page.locator('ul li div.line-clamp-1').first
+                first_item.click(timeout=60000)
+                page.wait_for_timeout(5000)
+                texts = page.locator('div.text-white-400.w-full.text-wrap.text-3xl.md\\:w-\\[70\\%\\]').inner_text()
+                logging.info(f"Text content: {texts}")
 
-            logging.info("Waiting for journal entries to appear...")
-            try:
-                page.wait_for_selector('.w-full:nth-child(2) > .mb-8 li', timeout=15000)
-            except PlaywrightTimeoutError as e:
-                logging.error(f"Error waiting for journal entries: {e}") # Something went wrong, surprise!
-                continue
+                CombinedParse(browser, page, texts.lower())
 
-            entries = page.locator('.w-full:nth-child(2) > .mb-8 li')
-            found_valid_entry = False
+                if texts != previous_text_content:
+                    previous_text_content = texts
+                    logging.info(f"Previous Text content: {previous_text_content}")
+                    
+                    # --- Integrations from main.py ---
+                    title = texts.lower()  # Assuming 'texts' is the title from the journal entry
+                    print('title after texts:', title)
+                    current_datetime = datetime.now()
+                    date = current_datetime.strftime('%Y-%m-%d')
+                    time = current_datetime.strftime('%H:%M:%S')
+                    
+                    if entry_exists(title, date, time):
+                        logging.info("DB entry already exists, reloading to check for new entries...")
+                    else:
+                        save_entry(title, date, time)
+                        logging.info(f"Saved entry: {title}, {date}, {time}")
 
-            for i in range(entries.count()):
-                entry = entries.nth(i)
-                if entry.locator('svg').count() == 0:
-                    logging.info(f"Attempting to click on entry {i}...")
-                    try:
-                        entry.click(timeout=15000)
-                        found_valid_entry = True
-                        break
-                    except PlaywrightTimeoutError as e:
-                        logging.error(f"Error clicking on entry {i}: {e}")
-                        continue
+                        first_word = title.split()[0].strip().lower().strip('.,!?:;')
+                        logging.info(f"First word of title: {first_word}")
 
-            if not found_valid_entry:
-                logging.info("No valid entries without SVG found, reloading...") # No good entries, try again
-                continue
-
-            title = page.locator('.text-white-400').text_content()
-            date = page.locator('.text-sm > div:nth-child(1)').text_content()
-            time = page.locator('.text-sm > div:nth-child(2)').text_content()
-
-            if entry_exists(title, date, time): # Check if entry already exists in the DB
-                logging.info("DB entry already exists, reloading to check for new entries...") # Already there, move on
+                        if re.match(r'^[a-z]+$', first_word) and first_word == "telegram":
+                            if telegram_isenabled:
+                                logging.info(f"Calling Telegram function with title: {title}")
+                                TelegramParse(browser, title)
+                            else:
+                                log_disabled_integration("Telegram")
+                        elif re.match(r'^[a-z]+$', first_word) and first_word == "computer":
+                            if computer_isenabled:
+                                logging.info(f"Calling Computer function with title: {title}")
+                                ComputerParse(browser, title)
+                            else:
+                                log_disabled_integration("Computer")
+                else:
+                    logging.info(f"Couldn't parse: {texts}")
+                # except Exception as e:
+                #     logging.error(f"An error occurred: {e}")
             else:
-                save_entry(title, date, time) # Save the new entry
-                logging.info(f"Saved entry: {title}, {date}, {time}") # Let the world know we saved it
-
-                first_word = title.split()[0].strip().lower().strip('.,!?:;') # Get the first word to determine if we need to do anything with it
-                logging.info(f"First word of title: {first_word}") # Log the first word
-
-                if re.match(r'^[a-z]+$', first_word) and first_word == "telegram": # Call Telegram function
-                    if telegram_isenabled:
-                        logging.info(f"Calling Telegram function with title: {title}")
-                        TelegramParse(browser, title)
-                    else:
-                        log_disabled_integration("Telegram")
-                elif re.match(r'^[a-z]+$', first_word) and first_word == "computer": # Call Computer function
-                    if computer_isenabled:
-                        logging.info(f"Calling Computer function with title: {title}")
-                        ComputerParse(browser, title)
-                    else:
-                        log_disabled_integration("Computer")
+                logging.error("The page has been closed. Exiting...")
+                break
+            logging.info("Timing out for 45 seconds... Checking again in 45 seconds...")
+            page.wait_for_timeout(45000)
 
 if __name__ == "__main__":
+    # --- Load .env and Start Application ---
     load_dotenv()
 
     if not RH_EMAIL or not RH_PASS:
         logging.error("Failed to load environment variables. Please check the .env file.")
         exit(1)
 
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s') # setup logging
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
     coloredlogs.install(level='INFO', fmt='%(asctime)s - %(levelname)s - %(message)s')
 
-    main() # run main!
+    main()

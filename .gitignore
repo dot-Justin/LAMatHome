@@ -1,0 +1,17 @@
+.env
+/.env
+.env/
+env/
+/env 
+node_modules/
+/node_modules
+node_modules
+.venv
+venv
+venv/
+/venv
+.venv/
+/.venv
+.burrow
+/.burrow
+.burrow/

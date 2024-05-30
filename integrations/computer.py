@@ -3,6 +3,7 @@ import urllib.parse
 import webbrowser
 import ctypes
 import logging
+import time
 from utils.helpers import log_disabled_integration
 
 #############################################################
@@ -11,7 +12,6 @@ from utils.helpers import log_disabled_integration
 #                                                           #
 #############################################################
 
-# Set False to disable Computer integration altogether
 computer_isenabled = True
 
 def ComputerParse(browser, title):
@@ -25,31 +25,37 @@ def ComputerParse(browser, title):
         return
 
     second_word = words[1].strip('.,!?:;').lower()
-    if second_word == "google":
-        if computergoogle_isenabled:
-            ComputerGoogle(title)
-        else:
-            log_disabled_integration("ComputerGoogle")
-    elif second_word == "youtube":
-        if computeryoutube_isenabled:
-            ComputerYoutube(title)
-        else:
-            log_disabled_integration("ComputerYoutube")
-    elif second_word == "gmail":
-        if computergmail_isenabled:
-            ComputerGmail(title)
-        else:
-            log_disabled_integration("ComputerGmail")
-    elif second_word == "amazon":
-        if computeramazon_isenabled:
-            ComputerAmazon(title)
-        else:
-            log_disabled_integration("ComputerAmazon")
-    elif second_word == "volume":
-        if computervolume_isenabled:
-            ComputerVolume(title)
-        else:
-            log_disabled_integration("ComputerVolume")
+    if second_word in ["google", "youtube", "gmail", "amazon", "volume", "run", "launch", "open"]:
+        if second_word == "google":
+            if computergoogle_isenabled:
+                ComputerGoogle(title)
+            else:
+                log_disabled_integration("ComputerGoogle")
+        elif second_word == "youtube":
+            if computeryoutube_isenabled:
+                ComputerYoutube(title)
+            else:
+                log_disabled_integration("ComputerYoutube")
+        elif second_word == "gmail":
+            if computergmail_isenabled:
+                ComputerGmail(title)
+            else:
+                log_disabled_integration("ComputerGmail")
+        elif second_word == "amazon":
+            if computeramazon_isenabled:
+                ComputerAmazon(title)
+            else:
+                log_disabled_integration("ComputerAmazon")
+        elif second_word == "volume":
+            if computervolume_isenabled:
+                ComputerVolume(title)
+            else:
+                log_disabled_integration("ComputerVolume")
+        elif second_word in ["run", "launch", "open"]:
+            if computerrun_isenabled:
+                ComputerRun(title)
+            else:
+                log_disabled_integration("ComputerRun")
     else:
         logging.error("Unknown Computer command or the integration is not enabled.")
 
@@ -67,9 +73,6 @@ def ComputerGoogle(title):
     if len(words) < 3:
         logging.error("Invalid prompt format for Computer Google command.")
         return
-
-    first_word = words[0].strip('.,!?:;')
-    second_word = words[1].strip('.,!?:;')
 
     query = " ".join(words[2:])
     encoded_query = urllib.parse.quote(query)
@@ -93,9 +96,6 @@ def ComputerYoutube(title):
         logging.error("Invalid prompt format for Computer Youtube command.")
         return
 
-    first_word = words[0].strip('.,!?:;')
-    second_word = words[1].strip('.,!?:;')
-
     query = " ".join(words[2:])
     encoded_query = urllib.parse.quote(query)
     url = f"https://www.youtube.com/results?search_query={encoded_query}"
@@ -118,9 +118,6 @@ def ComputerGmail(title):
         logging.error("Invalid prompt format for Computer Gmail command.")
         return
 
-    first_word = words[0].strip('.,!?:;')
-    second_word = words[1].strip('.,!?:;')
-
     query = " ".join(words[2:])
     encoded_query = urllib.parse.quote(query)
     url = f"https://mail.google.com/mail/u/0/#search/{encoded_query}"
@@ -142,9 +139,6 @@ def ComputerAmazon(title):
     if len(words) < 3:
         logging.error("Invalid prompt format for Computer Amazon command.")
         return
-
-    first_word = words[0].strip('.,!?:;')
-    second_word = words[1].strip('.,!?:;')
 
     query = " ".join(words[2:])
     encoded_query = urllib.parse.quote(query)
@@ -230,3 +224,44 @@ def ComputerVolume(title):
         logging.info(f"Set volume to {volume_value}%")
     except Exception as e:
         logging.error(f"Failed to set volume: {e}")
+
+###############################
+#         ComputerRun         #
+###############################
+
+computerrun_isenabled = True
+
+def ComputerRun(title):
+    if not computerrun_isenabled:
+        log_disabled_integration("ComputerRun")
+        return
+
+    title_cleaned = re.sub(r'[^\w\s]', '', title).lower()
+    words = title_cleaned.split()
+    if len(words) < 3:
+        logging.error("Invalid prompt format for Computer Run command.")
+        return
+
+    command = " ".join(words[2:])
+
+    try:
+        # Press Windows key
+        ctypes.windll.user32.keybd_event(0x5B, 0, 0, 0)
+        time.sleep(0.1)
+        ctypes.windll.user32.keybd_event(0x5B, 0, 2, 0)
+        time.sleep(0.1)
+
+        # Type the command
+        for char in command:
+            vk = ctypes.windll.user32.VkKeyScanW(ord(char))
+            ctypes.windll.user32.keybd_event(vk, 0, 0, 0)
+            ctypes.windll.user32.keybd_event(vk, 0, 2, 0)
+            time.sleep(0.05)
+
+        # Press Enter
+        ctypes.windll.user32.keybd_event(0x0D, 0, 0, 0)
+        ctypes.windll.user32.keybd_event(0x0D, 0, 2, 0)
+        
+        logging.info(f"Executed command: {command}")
+    except Exception as e:
+        logging.error(f"Failed to execute command: {e}")

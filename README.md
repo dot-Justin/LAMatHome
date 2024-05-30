@@ -11,13 +11,14 @@ This program locally runs Playwright to constantly refresh hole.rabbit.tech, loo
 ### 💻 Computer
 
 **Syntax**: `"Computer [Function] [Query]"`
-|| Function | Description | Syntax | Example |
+|🔹| Function | Description | Syntax | Example |
 |-|-|-|-|-|
 |🔎| **Google** | Performs a Google search for the provided query. | `"Computer Google [search query]"` | `"Computer Google What is the meaning of life?"`|
 |🔎| **YouTube** | Performs a YouTube search for the provided query.| `"Computer YouTube [search query]"`| `"Computer YouTube How to bake a cake"`|
 |🔎| **Gmail** | Performs a Gmail search for the provided query.| `"Computer Gmail [search query]"`| `"Computer Gmail AI"`|
 |🔎| **Amazon** | Performs an Amazon search for the provided query.| `"Computer Amazon [search query]"`| `"Computer Amazon Men's socks"`|
 |⚙️| **Volume** | Sets computer volume| `"Computer Volume [1-100\|up\|down\|mute\|unmute]"`| `"Computer Volume 30 \| Computer volume down"`|
+|⚙️| **Run** | Uses Windows search to open programs| `"Computer run\|open\|launch [search term]"`| `"Computer Run command prompt \| Computer Open notion"`|
 
 
 **Setup**: 
@@ -26,7 +27,7 @@ This program locally runs Playwright to constantly refresh hole.rabbit.tech, loo
 ### 💬 Telegram
 **Syntax**: `"Telegram [User] [Message content]"` (Working on more telegram functionality)
 
-|| Function | Description | Syntax | Example |
+|🔹| Function | Description | Syntax | Example |
 |-|-|-|-|-|
 |💬| **Telegram** | Messages a specified user on Telegram. | `"Telegram [Name (one word)] [Message]"` | `"Telegram Arthur What's up?"`|
 

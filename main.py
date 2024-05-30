@@ -23,12 +23,12 @@ def main():
             json.dump({}, f)
 
     with sync_playwright() as p:
-        browser = p.firefox.launch(headless=False)  # Launch Firefox, because Chrome is too mainstream (jk, it helps stability.) After your initial run (and you get logged into telegram), this can be set to True and you won't see LAH working!
+        browser = p.firefox.launch(headless=True)  # Launch Firefox, because Chrome is too mainstream (jk, it helps stability.) After your initial run (and you get logged into telegram), this can be set to True and you won't see LAH working!
         context = browser.new_context(storage_state=state_file) # Use state to stay logged in
         page = context.new_page() # Open a new page
 
-        # Block unnecessary resources
-        page.route("**/*", lambda route, request: route.continue_() if request.resource_type in ["document", "script", "xhr", "fetch"] else route.abort())
+        # Block unnecessary resources but allow CSS
+        page.route("**/*", lambda route, request: route.continue_() if request.resource_type in ["document", "script", "xhr", "fetch", "stylesheet"] else route.abort())
 
         page.goto("https://hole.rabbit.tech")
         if not page.is_visible('input#username'):

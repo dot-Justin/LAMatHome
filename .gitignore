@@ -15,14 +15,7 @@ venv/
 .burrow
 /.burrow
 .burrow/
-<<<<<<< Updated upstream
-utils/__pycache__
-Lib/
-Scripts/
-pyvenv.cfg
-=======
 Lib/
 Scripts/
 pyvenv.cfg
 utils/__pycache__
->>>>>>> Stashed changes

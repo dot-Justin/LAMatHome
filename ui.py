@@ -7,11 +7,7 @@ def create_env_file():
     try:
         rh_email = rh_email_entry.get()
         rh_pass = rh_pass_entry.get()
-<<<<<<< Updated upstream
-        rh_access_token = rh_access_token.get()
-=======
         rh_access_token = rh_access_token_entry.get()
->>>>>>> Stashed changes
         fb_email = fb_email_entry.get()
         fb_pass = fb_pass_entry.get()
         dc_email = dc_email_entry.get()

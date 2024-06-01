@@ -1,7 +1,7 @@
-import requests
 import time
+import requests
 from datetime import datetime, timedelta
-from get_env import RH_ACCESS_TOKEN
+from utils.get_env import RH_ACCESS_TOKEN
 
 
 def get_all_journals():

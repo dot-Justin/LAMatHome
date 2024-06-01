@@ -3,7 +3,10 @@ from utils.get_env import FB_EMAIL, FB_PASS
 
 logged_in = False
 
-def open_facebook_messenger(page, recipient, message):
+facebook_isenabled = True
+facebooktext_isenabled = True
+
+def FacebookText(page, recipient, message):
     """Opens Facebook Messenger, logs in (if needed),
         finds the recipient, and sends a message.
     """

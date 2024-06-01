@@ -3,6 +3,8 @@ from utils.get_env import DC_EMAIL, DC_PASS
 import time 
 
 dc_logged_in = False
+discord_isenabled = True
+discordtext_isenabled = True
 
 def login_discord(page):
     """Logs into Discord and saves authentication cookies."""
@@ -20,7 +22,7 @@ def login_discord(page):
     else:
         logging.info("Already logged into Discord.")
 
-def send_discord_message(page, recipient, message):
+def DiscordText(page, recipient, message):
     """Sends a message to a specific recipient on Discord."""
     global dc_logged_in
     if dc_logged_in == False:

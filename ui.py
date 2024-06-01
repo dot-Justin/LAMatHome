@@ -37,11 +37,7 @@ def create_env_file():
 
 def create_ui():
     """Creates and runs the UI for credential input."""
-<<<<<<< Updated upstream
-    global root, rh_email_entry, rh_pass_entry, rh_access_token, fb_email_entry, fb_pass_entry, dc_email_entry, dc_pass_entry
-=======
     global root, rh_email_entry, rh_pass_entry, rh_access_token_entry, fb_email_entry, fb_pass_entry, dc_email_entry, dc_pass_entry
->>>>>>> Stashed changes
     root = tk.Tk()
     root.title("Enter Credentials")
     root.configure(bg='#1a1a1a')
@@ -71,46 +67,39 @@ def create_ui():
     rh_pass_entry = ttk.Entry(input_frame, show="*")
     rh_pass_entry.grid(row=1, column=1, padx=5, pady=5, sticky='ew')
 
-<<<<<<< Updated upstream
-    rh_access_token = ttk.Label(input_frame, text="Rabbit Hole Access Token:")
-    rh_access_token.grid(row=1, column=0, padx=5, pady=5, sticky='w')
-    rh_access_token = ttk.Entry(input_frame, show="*")
-    rh_access_token.grid(row=1, column=1, padx=5, pady=5, sticky='ew')
-=======
     rh_access_token_label = ttk.Label(input_frame, text="Rabbit Hole Access Token:")
-    rh_access_token_label.grid(row=1, column=0, padx=5, pady=5, sticky='w')
+    rh_access_token_label.grid(row=2, column=0, padx=5, pady=5, sticky='w')
     rh_access_token_entry = ttk.Entry(input_frame, show="*")
-    rh_access_token_entry.grid(row=1, column=1, padx=5, pady=5, sticky='ew')
->>>>>>> Stashed changes
+    rh_access_token_entry.grid(row=2, column=1, padx=5, pady=5, sticky='ew')
 
     # Facebook Credentials
     fb_email_label = ttk.Label(input_frame, text="Facebook Email:")
-    fb_email_label.grid(row=2, column=0, padx=5, pady=5, sticky='w')
+    fb_email_label.grid(row=3, column=0, padx=5, pady=5, sticky='w')
     fb_email_entry = ttk.Entry(input_frame)
-    fb_email_entry.grid(row=2, column=1, padx=5, pady=5, sticky='ew')
+    fb_email_entry.grid(row=3, column=1, padx=5, pady=5, sticky='ew')
 
     fb_pass_label = ttk.Label(input_frame, text="Facebook Password:")
-    fb_pass_label.grid(row=3, column=0, padx=5, pady=5, sticky='w')
+    fb_pass_label.grid(row=4, column=0, padx=5, pady=5, sticky='w')
     fb_pass_entry = ttk.Entry(input_frame, show="*")
-    fb_pass_entry.grid(row=3, column=1, padx=5, pady=5, sticky='ew')
+    fb_pass_entry.grid(row=4, column=1, padx=5, pady=5, sticky='ew')
 
     # Discord Credentials
     dc_email_label = ttk.Label(input_frame, text="Discord Email:")
-    dc_email_label.grid(row=4, column=0, padx=5, pady=5, sticky='w')
+    dc_email_label.grid(row=5, column=0, padx=5, pady=5, sticky='w')
     dc_email_entry = ttk.Entry(input_frame)
-    dc_email_entry.grid(row=4, column=1, padx=5, pady=5, sticky='ew')
+    dc_email_entry.grid(row=5, column=1, padx=5, pady=5, sticky='ew')
 
     dc_pass_label = ttk.Label(input_frame, text="Discord Password:")
-    dc_pass_label.grid(row=5, column=0, padx=5, pady=5, sticky='w')
+    dc_pass_label.grid(row=6, column=0, padx=5, pady=5, sticky='w')
     dc_pass_entry = ttk.Entry(input_frame, show="*")
-    dc_pass_entry.grid(row=5, column=1, padx=5, pady=5, sticky='ew')
+    dc_pass_entry.grid(row=6, column=1, padx=5, pady=5, sticky='ew')
 
     # Submit Button
     submit_button = ttk.Button(root, text="Submit", command=create_env_file)
     submit_button.pack(pady=10)
 
     # Make input fields expand to fill the width
-    for i in range(6):
+    for i in range(7):
         input_frame.grid_rowconfigure(i, weight=1)
     input_frame.grid_columnconfigure(1, weight=1)
 

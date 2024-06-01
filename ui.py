@@ -7,6 +7,11 @@ def create_env_file():
     try:
         rh_email = rh_email_entry.get()
         rh_pass = rh_pass_entry.get()
+<<<<<<< Updated upstream
+        rh_access_token = rh_access_token.get()
+=======
+        rh_access_token = rh_access_token_entry.get()
+>>>>>>> Stashed changes
         fb_email = fb_email_entry.get()
         fb_pass = fb_pass_entry.get()
         dc_email = dc_email_entry.get()
@@ -23,6 +28,7 @@ def create_env_file():
         with open(".env", "w") as env_file:
             env_file.write(f"RH_EMAIL='{rh_email}'\n")
             env_file.write(f"RH_PASS='{rh_pass}'\n")
+            env_file.write(f"RH_ACCESS_TOKEN='{rh_access_token}'\n")
             env_file.write(f"FB_EMAIL='{fb_email}'\n")
             env_file.write(f"FB_PASS='{fb_pass}'\n")  # Corrected key name
             env_file.write(f"DC_EMAIL='{dc_email}'\n")
@@ -35,7 +41,11 @@ def create_env_file():
 
 def create_ui():
     """Creates and runs the UI for credential input."""
-    global root, rh_email_entry, rh_pass_entry, fb_email_entry, fb_pass_entry, dc_email_entry, dc_pass_entry
+<<<<<<< Updated upstream
+    global root, rh_email_entry, rh_pass_entry, rh_access_token, fb_email_entry, fb_pass_entry, dc_email_entry, dc_pass_entry
+=======
+    global root, rh_email_entry, rh_pass_entry, rh_access_token_entry, fb_email_entry, fb_pass_entry, dc_email_entry, dc_pass_entry
+>>>>>>> Stashed changes
     root = tk.Tk()
     root.title("Enter Credentials")
     root.configure(bg='#1a1a1a')
@@ -64,6 +74,18 @@ def create_ui():
     rh_pass_label.grid(row=1, column=0, padx=5, pady=5, sticky='w')
     rh_pass_entry = ttk.Entry(input_frame, show="*")
     rh_pass_entry.grid(row=1, column=1, padx=5, pady=5, sticky='ew')
+
+<<<<<<< Updated upstream
+    rh_access_token = ttk.Label(input_frame, text="Rabbit Hole Access Token:")
+    rh_access_token.grid(row=1, column=0, padx=5, pady=5, sticky='w')
+    rh_access_token = ttk.Entry(input_frame, show="*")
+    rh_access_token.grid(row=1, column=1, padx=5, pady=5, sticky='ew')
+=======
+    rh_access_token_label = ttk.Label(input_frame, text="Rabbit Hole Access Token:")
+    rh_access_token_label.grid(row=1, column=0, padx=5, pady=5, sticky='w')
+    rh_access_token_entry = ttk.Entry(input_frame, show="*")
+    rh_access_token_entry.grid(row=1, column=1, padx=5, pady=5, sticky='ew')
+>>>>>>> Stashed changes
 
     # Facebook Credentials
     fb_email_label = ttk.Label(input_frame, text="Facebook Email:")

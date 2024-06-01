@@ -162,65 +162,66 @@ def CombinedParse(browser, page, text):
         logging.error("Invalid prompt format.")
         return
 
-    first_word = words[0].strip('.,!?:;').lower()
-    second_word = words[1].strip('.,!?:;').lower()
+    platform = words[0].strip('.,!?:;').lower()
+    recipient = words[1].strip('.,!?:;').lower()
+    message = ' '.join(words[2:]).strip('.,!?:;').lower()
 
-    if first_word == "telegram":
+    if platform == "telegram":
         if telegram_isenabled:
             if telegramtext_isenabled:
-                TelegramText(browser, text)
+                TelegramText(page, text)
             else:
                 log_disabled_integration("TelegramText")
         else:
             log_disabled_integration("Telegram")
-    elif first_word == "discord":
+    elif platform == "discord":
         if discord_isenabled:
             if discordtext_isenabled:
-                DiscordText(browser, text)
+                DiscordText(page, recipient, message)
             else:
                 log_disabled_integration("DiscordText")
         else:
             log_disabled_integration("Discord")
-    elif first_word == "facebook":
+    elif platform == "facebook":
         if facebook_isenabled:
             if facebooktext_isenabled:
-                FacebookText(browser, text)
+                FacebookText(page, recipient, message)
             else:
                 log_disabled_integration("FacebookText")
         else:
             log_disabled_integration("Facebook")
-    elif first_word == "computer":
+    elif platform == "computer":
         if not computer_isenabled:
             log_disabled_integration("Computer")
             return
 
-        if second_word in ["google", "youtube", "gmail", "amazon", "volume", "run", "launch", "open"]:
-            if second_word == "google":
+        if recipient in ["google", "youtube", "gmail", "amazon", "volume", "run", "launch", "open"]:
+            if recipient == "google":
                 if computergoogle_isenabled:
                     ComputerGoogle(text)
                 else:
                     log_disabled_integration("ComputerGoogle")
-            elif second_word == "youtube":
+            elif recipient == "youtube":
                 if computeryoutube_isenabled:
                     ComputerYoutube(text)
                 else:
                     log_disabled_integration("ComputerYoutube")
-            elif second_word == "gmail":
+            elif recipient == "gmail":
                 if computergmail_isenabled:
                     ComputerGmail(text)
                 else:
                     log_disabled_integration("ComputerGmail")
-            elif second_word == "amazon":
+            elif recipient == "amazon":
                 if computeramazon_isenabled:
                     ComputerAmazon(text)
                 else:
                     log_disabled_integration("ComputerAmazon")
-            elif second_word == "volume":
+            elif recipient == "volume":
                 if computervolume_isenabled:
                     ComputerVolume(text)
                 else:
                     log_disabled_integration("ComputerVolume")
-            elif second_word in ["run", "launch", "open"]:
+            elif recipient in ["run", "launch", "open"]:
                 if computerrun_isenabled:
                     ComputerRun(text)
                 else:

@@ -15,3 +15,7 @@ venv/
 .burrow
 /.burrow
 .burrow/
+Lib/
+Scripts/
+pyvenv.cfg
+utils/__pycache__

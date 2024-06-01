@@ -2,3 +2,4 @@ playwright
 python-dotenv
 coloredlogs
 tk
+requests

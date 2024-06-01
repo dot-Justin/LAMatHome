@@ -19,3 +19,4 @@ Lib/
 Scripts/
 pyvenv.cfg
 utils/__pycache__
+integrations/__pycache__

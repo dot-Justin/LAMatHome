@@ -9,11 +9,11 @@ from integrations.computer import ComputerParse, computer_isenabled
 from integrations.telegram import TelegramParse, telegram_isenabled
 from utils.database import init_db, entry_exists, save_entry
 from utils.helpers import log_disabled_integration
+from utils.llm_parse import LLMParse, CombinedParse
 from utils.get_env import RH_EMAIL, RH_PASS
 from integrations.discord import login_discord, send_discord_message
 from integrations.facebook import open_facebook_messenger
 from integrations.rabbithole import login_hole_rabbit
-from integrations.parse import CombinedParse
 from dotenv import load_dotenv
 
 # --- Main execution ---

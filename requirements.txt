@@ -3,3 +3,4 @@ python-dotenv
 coloredlogs
 tk
 requests
+groq

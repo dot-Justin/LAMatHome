@@ -162,11 +162,11 @@ def CombinedParse(page, text):
         logging.error("Invalid prompt format.")
         return
 
-    platform = words[0].strip('.,!?:;')
-    recipient = words[1].strip('.,!?:;')
+    platform = words[0].strip('.,!?:;').lower()
+    recipient = words[1].strip('.,!?:;').lower()
     message = ' '.join(words[2:]).strip('.,!?:;')
 
-    if platform.lower() == "telegram":
+    if platform == "telegram":
         if telegram_isenabled:
             if telegramtext_isenabled:
                 TelegramText(page, recipient, message)
@@ -174,7 +174,7 @@ def CombinedParse(page, text):
                 log_disabled_integration("TelegramText")
         else:
             log_disabled_integration("Telegram")
-    elif platform.lower() == "discord":
+    elif platform == "discord":
         if discord_isenabled:
             if discordtext_isenabled:
                 DiscordText(page, recipient, message)
@@ -182,7 +182,7 @@ def CombinedParse(page, text):
                 log_disabled_integration("DiscordText")
         else:
             log_disabled_integration("Discord")
-    elif platform.lower() == "facebook":
+    elif platform == "facebook":
         if facebook_isenabled:
             if facebooktext_isenabled:
                 FacebookText(page, recipient, message)
@@ -198,27 +198,27 @@ def CombinedParse(page, text):
         if recipient in ["google", "youtube", "gmail", "amazon", "volume", "run", "launch", "open"]:
             if recipient == "google":
                 if computergoogle_isenabled:
-                    ComputerGoogle(page, message)
+                    ComputerGoogle(text)
                 else:
                     log_disabled_integration("ComputerGoogle")
             elif recipient == "youtube":
                 if computeryoutube_isenabled:
-                    ComputerYoutube(page, message)
+                    ComputerYoutube(text)
                 else:
                     log_disabled_integration("ComputerYoutube")
             elif recipient == "gmail":
                 if computergmail_isenabled:
-                    ComputerGmail(page, message)
+                    ComputerGmail(text)
                 else:
                     log_disabled_integration("ComputerGmail")
             elif recipient == "amazon":
                 if computeramazon_isenabled:
-                    ComputerAmazon(page, message)
+                    ComputerAmazon(text)
                 else:
                     log_disabled_integration("ComputerAmazon")
             elif recipient == "volume":
                 if computervolume_isenabled:
-                    ComputerVolume(page, message)
+                    ComputerVolume(text)
                 else:
                     log_disabled_integration("ComputerVolume")
             elif recipient in ["run", "launch", "open"]:

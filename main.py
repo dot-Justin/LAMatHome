@@ -5,7 +5,6 @@ import logging
 import coloredlogs
 from datetime import datetime
 from ui import create_ui
-from utils.get_env import RH_EMAIL, RH_PASS
 from utils.llm_parse import LLMParse, CombinedParse
 from utils.helpers import log_disabled_integration
 from utils.journals import journal_entries_generator
@@ -20,16 +19,12 @@ from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeo
 def main():
 
     # Check if .env exists, if not run ui.py to create it
-    first_run=False
     if not os.path.exists(".env"):
         create_ui()
-        first_run=True
-
-    if not first_run:
-        print(colored_splash)
-        state_file = "state.json"
-
+    print(colored_splash)
+    
     # Ensure state.json exists and is valid
+    state_file = "state.json"
     if not os.path.exists(state_file) or os.stat(state_file).st_size == 0:
         with open(state_file, 'w') as f:
             json.dump({}, f)

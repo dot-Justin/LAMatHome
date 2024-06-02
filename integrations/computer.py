@@ -165,7 +165,7 @@ def ComputerVolume(title):
 
     words = title_cleaned.split()
     if len(words) < 3:
-        logging.error("Invalid prompt format for Computer Volume command.")
+        logging.error(f"Invalid prompt format '{title_cleaned}' for Computer Volume command.")
         return
 
     volume_word = words[2]

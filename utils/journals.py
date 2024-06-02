@@ -1,14 +1,18 @@
+import sys
 import time
+import logging
 import requests
 from datetime import datetime, timedelta
 from utils.get_env import RH_ACCESS_TOKEN
 
+error_count = 0  # Global variable to track error count
 
 def get_all_journals():
     '''
     Fetches all journal entries for the given user.
     TODO: Add pagination support when rabbit hole API supports it.
     '''
+    global error_count  # Use the global error count
     fetchJournalEndpoint = f"https://hole.rabbit.tech/apis/fetchUserJournal"
     headers = {
         "sec-ch-ua": "\"Google Chrome\";v=\"125\", \"Chromium\";v=\"125\", \"Not.A/Brand\";v=\"24\"",
@@ -29,9 +33,20 @@ def get_all_journals():
         response = requests.post(fetchJournalEndpoint, headers=headers, json=body)
         response.raise_for_status()  # Raise an error for bad status codes
         responseDict = response.json()
+        error_count = 0  # Reset error count on successful response
+        #logging.info(f"Error count: {error_count}")
         return responseDict
+
     except requests.exceptions.RequestException as e:
-        print(f"Error fetching journals: {e}")
+        if isinstance(e, requests.exceptions.HTTPError):
+            if e.response.status_code == 500 and "500 Server Error: Internal Server Error" in str(e):
+                error_count += 1
+                # logging.error(f"Error count: {error_count}")
+                if error_count > 1:
+                    logging.error(f"Error fetching journals: {e}")
+                    logging.error("FAILED TO CONNECT, PLEASE UPDATE YOUR TOKEN. Terminating...")
+                    sys.exit()
+        logging.error(f"Error fetching journals: {e}")
         return None
 
 

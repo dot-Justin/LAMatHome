@@ -16,6 +16,8 @@ def main():
     if not os.path.exists(".env"):
         create_ui()
     print(colored_splash)
+    logging.info("LAMAtHome has started!")
+
     
     # Ensure state.json exists and is valid
     state_file = "state.json"
@@ -42,6 +44,6 @@ if __name__ == "__main__":
     # --- Start Application ---
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
     coloredlogs.install(level='INFO', fmt='%(asctime)s - %(levelname)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S', field_styles={
-        'asctime': {'color': 'cyan'}
+        'asctime': {'color': 'white'}
     })
     main()

@@ -106,4 +106,4 @@ def create_ui():
     root.mainloop()  # Run the UI
 
 # Run the UI
-create_ui()
+# create_ui()

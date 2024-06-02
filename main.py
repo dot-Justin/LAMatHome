@@ -19,12 +19,15 @@ from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeo
 # --- Main execution ---
 def main():
 
-    print(colored_splash)
-    state_file = "state.json"
+    # Check if .env exists, if not run ui.py to create it
+    first_run=False
+    if not os.path.exists(".env"):
+        create_ui()
+        first_run=True
 
-    # # Check if .env exists, if not run ui.py to create it
-    # if not os.path.exists(".env"):
-    #     create_ui()
+    if not first_run:
+        print(colored_splash)
+        state_file = "state.json"
 
     # Ensure state.json exists and is valid
     if not os.path.exists(state_file) or os.stat(state_file).st_size == 0:
@@ -32,7 +35,7 @@ def main():
             json.dump({}, f)
 
     with sync_playwright() as p:
-        browser = p.firefox.launch(headless=False) # Use firefox for full headless. If this gets stuck at any point, set to True, and try again.
+        browser = p.firefox.launch(headless=True) # Use firefox for full headless. If this gets stuck at any point, set to True, and try again.
         context = browser.new_context(storage_state=state_file)  # Use state to stay logged in
         page = context.new_page()  # Open a new page
 

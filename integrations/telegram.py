@@ -2,44 +2,17 @@ import logging
 import os
 from utils.helpers import log_disabled_integration
 
-#############################################################
-#                                                           #
-#                          Telegram:                        #
-#                                                           #
-#############################################################
-
-# Set False to disable Computer integration altogether
 telegram_isenabled = True
-
-def TelegramParse(browser, title):
-    if not telegram_isenabled:
-        log_disabled_integration("Telegram")
-        return
-
-    words = title.split()
-    if len(words) < 3:
-        logging.error("Invalid prompt format for Telegram command.")
-        return
-
-    if telegramtext_isenabled:
-        TelegramText(browser, title)
-    else:
-        log_disabled_integration("TelegramText")
-
-##########################
-#      TelegramText      #
-##########################
-
 telegramtext_isenabled = True
 
-def TelegramText(browser, title):
+def TelegramText(page, recipient, message):
     if not telegramtext_isenabled:
         return
 
-    session_file = "sessions/telegram_state.json"
-    os.makedirs("sessions", exist_ok=True)
+    session_file = "state.json"
+    # os.makedirs("sessions", exist_ok=True)
 
-    context = browser.new_context(storage_state=session_file if os.path.exists(session_file) else None)
+    context = page.context
     page = context.new_page()
     page.goto("https://web.telegram.org/k/")
 
@@ -48,15 +21,7 @@ def TelegramText(browser, title):
     else:
         logging.info("Telegram session expired, logging in again.")
 
-    words = title.split()
-    if len(words) < 3:
-        logging.error("Invalid prompt format for Telegram message.")
-        return
-
-    user_search = words[1]
-    message = " ".join(words[2:])
-
-    logging.info(f"User to search: {user_search}")
+    logging.info(f"User to search: {recipient}")
     logging.info(f"Message to send: {message}")
 
     login_successful = False
@@ -71,7 +36,7 @@ def TelegramText(browser, title):
     if login_successful:
         context.storage_state(path=session_file)
 
-        page.fill('[placeholder=" "]', user_search)
+        page.fill('[placeholder=" "]', recipient)
         page.press('[placeholder=" "]', 'Enter')
         page.wait_for_timeout(1000)
 
@@ -82,7 +47,7 @@ def TelegramText(browser, title):
             page.fill('.input-message-input:nth-child(1)', message)
             page.click('.btn-send > .c-ripple')
 
-            logging.info(f"Sent message to {user_search}: {message}")
+            logging.info(f"Sent message to {recipient}: {message}")
         else:
             logging.error("No users found, aborting.")
             context.close()
@@ -93,4 +58,6 @@ def TelegramText(browser, title):
         return
 
     context.storage_state(path=session_file)
-    context.close()
+    # Close the telegram page, but keep context open for other integrations
+    page.close()
+    

@@ -156,7 +156,7 @@ def LLMParse(user_prompt, temperature=0.1, top_p=1):
         logging.error(f"An error occurred: {e}")
         raise ValueError(f"Failed to get response from API: {e}")
 
-def CombinedParse(browser, page, text):
+def CombinedParse(page, text):
     words = text.split()
     if len(words) < 3:
         logging.error("Invalid prompt format.")
@@ -164,12 +164,12 @@ def CombinedParse(browser, page, text):
 
     platform = words[0].strip('.,!?:;').lower()
     recipient = words[1].strip('.,!?:;').lower()
-    message = ' '.join(words[2:]).strip('.,!?:;').lower()
+    message = ' '.join(words[2:]).strip('.,!?:;')
 
     if platform == "telegram":
         if telegram_isenabled:
             if telegramtext_isenabled:
-                TelegramText(page, text)
+                TelegramText(page, recipient, message)
             else:
                 log_disabled_integration("TelegramText")
         else:

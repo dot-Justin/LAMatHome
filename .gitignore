@@ -20,3 +20,6 @@ Scripts/
 pyvenv.cfg
 utils/__pycache__/
 integrations/__pycache__
+__pycache__/
+state.json
+utils/llm_parse_tester.py

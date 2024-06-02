@@ -223,7 +223,7 @@ def CombinedParse(page, text):
                     log_disabled_integration("ComputerVolume")
             elif recipient in ["run", "launch", "open"]:
                 if computerrun_isenabled:
-                    ComputerRun(page, message)
+                    ComputerRun(text)
                 else:
                     log_disabled_integration("ComputerRun")
         else:

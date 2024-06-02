@@ -1,18 +1,12 @@
 import os
-import re
 import json
 import logging
 import coloredlogs
 from datetime import datetime
 from ui import create_ui
 from utils.llm_parse import LLMParse, CombinedParse
-from utils.helpers import log_disabled_integration
 from utils.journals import journal_entries_generator
 from utils.splashscreen import colored_splash
-from integrations.computer import computer_isenabled
-from integrations.telegram import telegram_isenabled
-from integrations.discord import login_discord, DiscordText
-from integrations.facebook import FacebookText
 from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
 
 # --- Main execution ---

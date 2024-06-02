@@ -156,25 +156,25 @@ def LLMParse(user_prompt, temperature=0.1, top_p=1):
         logging.error(f"An error occurred: {e}")
         raise ValueError(f"Failed to get response from API: {e}")
 
-def CombinedParse(browser, page, text):
+def CombinedParse(page, text):
     words = text.split()
     if len(words) < 3:
         logging.error("Invalid prompt format.")
         return
 
-    platform = words[0].strip('.,!?:;').lower()
-    recipient = words[1].strip('.,!?:;').lower()
-    message = ' '.join(words[2:]).strip('.,!?:;').lower()
+    platform = words[0].strip('.,!?:;')
+    recipient = words[1].strip('.,!?:;')
+    message = ' '.join(words[2:]).strip('.,!?:;')
 
-    if platform == "telegram":
+    if platform.lower() == "telegram":
         if telegram_isenabled:
             if telegramtext_isenabled:
-                TelegramText(page, text)
+                TelegramText(page, recipient, message)
             else:
                 log_disabled_integration("TelegramText")
         else:
             log_disabled_integration("Telegram")
-    elif platform == "discord":
+    elif platform.lower() == "discord":
         if discord_isenabled:
             if discordtext_isenabled:
                 DiscordText(page, recipient, message)
@@ -182,7 +182,7 @@ def CombinedParse(browser, page, text):
                 log_disabled_integration("DiscordText")
         else:
             log_disabled_integration("Discord")
-    elif platform == "facebook":
+    elif platform.lower() == "facebook":
         if facebook_isenabled:
             if facebooktext_isenabled:
                 FacebookText(page, recipient, message)
@@ -198,32 +198,32 @@ def CombinedParse(browser, page, text):
         if recipient in ["google", "youtube", "gmail", "amazon", "volume", "run", "launch", "open"]:
             if recipient == "google":
                 if computergoogle_isenabled:
-                    ComputerGoogle(text)
+                    ComputerGoogle(page, message)
                 else:
                     log_disabled_integration("ComputerGoogle")
             elif recipient == "youtube":
                 if computeryoutube_isenabled:
-                    ComputerYoutube(text)
+                    ComputerYoutube(page, message)
                 else:
                     log_disabled_integration("ComputerYoutube")
             elif recipient == "gmail":
                 if computergmail_isenabled:
-                    ComputerGmail(text)
+                    ComputerGmail(page, message)
                 else:
                     log_disabled_integration("ComputerGmail")
             elif recipient == "amazon":
                 if computeramazon_isenabled:
-                    ComputerAmazon(text)
+                    ComputerAmazon(page, message)
                 else:
                     log_disabled_integration("ComputerAmazon")
             elif recipient == "volume":
                 if computervolume_isenabled:
-                    ComputerVolume(text)
+                    ComputerVolume(page, message)
                 else:
                     log_disabled_integration("ComputerVolume")
             elif recipient in ["run", "launch", "open"]:
                 if computerrun_isenabled:
-                    ComputerRun(text)
+                    ComputerRun(page, message)
                 else:
                     log_disabled_integration("ComputerRun")
         else:

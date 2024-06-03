@@ -9,8 +9,7 @@ def TelegramText(page, recipient, message):
     if not telegramtext_isenabled:
         return
 
-    session_file = "state.json"
-    # os.makedirs("sessions", exist_ok=True)
+    session_file = "state/state.json"
 
     context = page.context
     page = context.new_page()

@@ -6,12 +6,6 @@ import logging
 import time
 from utils.helpers import log_disabled_integration
 
-#############################################################
-#                                                           #
-#                          Computer:                        #
-#                                                           #
-#############################################################
-
 computer_isenabled = True
 
 def ComputerParse(browser, title):

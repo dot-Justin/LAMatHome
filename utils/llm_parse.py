@@ -164,7 +164,7 @@ def CombinedParse(page, text):
 
     platform = words[0].strip('.,!?:;').lower()
     recipient = words[1].strip('.,!?:;').lower()
-    message = ' '.join(words[2:]).strip('.,!?:;')
+    message = ' '.join(words[2:]).strip('.,!?:;').lower()
 
     if platform == "telegram":
         if telegram_isenabled:

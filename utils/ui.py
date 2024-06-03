@@ -1,6 +1,5 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-import subprocess
 
 def create_env_file():
     """Creates a .env file with user-provided credentials."""

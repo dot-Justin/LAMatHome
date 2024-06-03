@@ -3,7 +3,7 @@ import json
 import logging
 import coloredlogs
 from datetime import datetime
-from ui import create_ui
+from utils.ui import create_ui
 from utils.llm_parse import LLMParse, CombinedParse
 from utils.journals import journal_entries_generator
 from utils.splashscreen import colored_splash
@@ -20,13 +20,13 @@ def main():
 
     
     # Ensure state.json exists and is valid
-    state_file = "state.json"
+    state_file = "state/state.json"
     if not os.path.exists(state_file) or os.stat(state_file).st_size == 0:
         with open(state_file, 'w') as f:
             json.dump({}, f)
 
     with sync_playwright() as p:
-        browser = p.firefox.launch(headless=True) # Use firefox for full headless. If this gets stuck at any point, set to True, and try again.
+        browser = p.firefox.launch(headless=False) # Use firefox for full headless. If this gets stuck at any point, set to True, and try again.
         context = browser.new_context(storage_state=state_file)  # Use state to stay logged in
         page = context.new_page()  # Open a new page
 

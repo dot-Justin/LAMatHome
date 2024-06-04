@@ -8,6 +8,3 @@ lamathometerminate_isenabled = True
 def terminate():
     print(colored_splash_goodbye)
     sys.exit()
-
-# if __name__ == "__main__":
-#     print(colored_splash_goodbye)

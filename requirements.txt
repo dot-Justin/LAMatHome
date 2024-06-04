@@ -6,3 +6,4 @@ requests
 groq
 vobject
 fuzzywuzzy
+pytextnow

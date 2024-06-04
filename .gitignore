@@ -23,3 +23,5 @@ integrations/__pycache__
 __pycache__/
 state/state.json
 utils/llm_parse_tester.py
+contacts.vcf
+contacts.json

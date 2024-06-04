@@ -17,7 +17,6 @@ def main():
         create_ui()
     print(colored_splash)
     logging.info("LAMAtHome has started!")
-
     
     # Ensure state.json exists and is valid
     state_file = "state/state.json"
@@ -32,7 +31,7 @@ def main():
             json.dump({}, f)
 
     with sync_playwright() as p:
-        browser = p.firefox.launch(headless=False) # Use firefox for full headless. If this gets stuck at any point, set to True, and try again.
+        browser = p.firefox.launch(headless=False)  # Use firefox for full headless. If this gets stuck at any point, set to True, and try again.
         context = browser.new_context(storage_state=state_file)  # Use state to stay logged in
         page = context.new_page()  # Open a new page
 
@@ -43,6 +42,7 @@ def main():
                 logging.info(f"Prompt: {prompt}")
                 promptParsed = LLMParse(prompt)
                 CombinedParse(page, promptParsed)
+                
         else:
             logging.error("The page has been closed. Exiting...")
 

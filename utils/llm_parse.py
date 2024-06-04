@@ -170,7 +170,7 @@ def CombinedParse(page, text):
 
     integration = words[0].strip('.,!?:;').lower()
     recipient = words[1].strip('.,!?:;').lower()
-    message = ' '.join(words[2:]).strip('.,!?:;').lower()
+    message = ' '.join(words[2:]).strip('.,!?:;')
 
     if integration == "telegram":
         if telegram_isenabled:

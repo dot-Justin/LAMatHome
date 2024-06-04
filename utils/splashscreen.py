@@ -45,3 +45,12 @@ def apply_gradient(text, start_color, end_color):
 start_color = '#dac60e'
 end_color = '#ff4d00'
 colored_splash = apply_gradient(splash_text, start_color, end_color)
+
+splash_text_goodbye = """
+LAMatHome is exiting... Goodbye!
+   __    ___    __  ___  ___   __    __ __                   |    (\  /)
+  / /   / _ |  /  |/  / / _ | / /_  / // /___   __ _  ___    |
+ / /__ / __ | / /|_/ / / __ |/ __/ / _  // _ \ /  ' \/ -_)   |   (◠ + ◠ )
+/____//_/ |_|/_/  /_/ /_/ |_|\__/ /_//_/ \___//_/_/_/\__/    |      ►◄
+"""
+colored_splash_goodbye = apply_gradient(splash_text_goodbye, start_color, end_color)

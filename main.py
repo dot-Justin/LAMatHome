@@ -26,7 +26,7 @@ def main():
     # Ensure the directory exists
     if not os.path.exists(state_dir):
         os.makedirs(state_dir)
-        
+    
     if not os.path.exists(state_file) or os.stat(state_file).st_size == 0:
         with open(state_file, 'w') as f:
             json.dump({}, f)

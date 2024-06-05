@@ -11,14 +11,12 @@ from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeo
 
 # --- Main execution ---
 def main():
-
     # Check if .env exists, if not run ui.py to create it
     if not os.path.exists(".env"):
         create_ui()
     print(colored_splash)
     logging.info("LAMAtHome has started!")
 
-    
     # Ensure state.json exists and is valid
     state_file = "state/state.json"
     state_dir = os.path.dirname(state_file)
@@ -31,6 +29,8 @@ def main():
         with open(state_file, 'w') as f:
             json.dump({}, f)
 
+    last_prompt = None  # Initialize last_prompt
+
     with sync_playwright() as p:
         browser = p.firefox.launch(headless=False) # Use firefox for full headless. If this gets stuck at any point, set to True, and try again.
         context = browser.new_context(storage_state=state_file)  # Use state to stay logged in
@@ -41,8 +41,9 @@ def main():
                 # --- Parse the journal entry ---
                 prompt = journal['utterance']['prompt']
                 logging.info(f"Prompt: {prompt}")
-                promptParsed = LLMParse(prompt)
+                promptParsed = LLMParse(prompt, last_prompt)  # Pass last_prompt to LLMParse
                 CombinedParse(page, promptParsed)
+                last_prompt = prompt  # Update last_prompt with the current prompt
         else:
             logging.error("The page has been closed. Exiting...")
 

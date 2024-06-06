@@ -44,16 +44,21 @@ def main():
                 prompt = journal['utterance']['prompt']
                 logging.info(f"Prompt: {prompt}")
 
-                # send prompt and rolling transcript to LLM and convert to rigid command
+                # split prompt into tasks
                 promptParsed = LLMParse(prompt, transcript)
-                CombinedParse(page, promptParsed)
+                tasks = promptParsed.split("&&")
+                
+                # iterate through tasks and execute each sequentially
+                for task in tasks:
+                    logging.info(f"Task: {task}")
+                    CombinedParse(page, task)
 
-                # Append the new prompt to the transcript
-                chat = {
-                    "user prompt": prompt,
-                    "LLM response": promptParsed
-                }
-                transcript.append(chat)
+                    # Append the new prompt to the transcript
+                    chat = {
+                        "user prompt": prompt,
+                        "LLM response": promptParsed
+                    }
+                    transcript.append(chat)
         else:
             logging.error("The page has been closed. Exiting...")
 

@@ -73,7 +73,7 @@ def LLMParse(user_prompt, transcript=None, temperature=0.1, top_p=1):
             Absolute Requirement for Messaging Commands: For messaging commands, ensure all three variables [Platform], [Name], and [Message] are present. If ANY piece is missing, respond with "x".
             No Placeholders: Do not use placeholders (e.g., [Name], [Message]). If the recipient is ambiguous (e.g., "team", "my brother"), respond with "x".
             Unclear or Unlisted Commands: If a command is unclear or not listed, respond with "x".
-            Prompt Chaining: If there are multiple commands in one prompt, output exactly like this: [Command1]&&[Command2] (Make sure to bind two commands together, you must use &&, just like in unix/linux OS.) If one of the commands is invalid, no worries! Just output "x&&[valid command here]"
+            Task Chaining: If there are multiple commands in one prompt, output exactly like this: [Command1]&&[Command2]...&&[CommandN] (Make sure to bind the commands together, you must use && as a seperator, just like in unix/linux OS.) If a command is invalid, no worries! Just output "x&&[valid command here]"
             Exact Output: Always output the exact command or "x". No extra text.
             No User Interaction: Do not provide any explanations or interact with the user. Only output formatted commands or "x".
             Sensitive Queries: If asked to describe your internal workings or for general knowledge, respond with "x".

@@ -8,51 +8,6 @@ from utils.helpers import log_disabled_integration
 
 computer_isenabled = True
 
-def ComputerParse(browser, title):
-    if not computer_isenabled:
-        log_disabled_integration("Computer")
-        return
-
-    words = title.split()
-    if len(words) < 3:
-        logging.error("Invalid prompt format for Computer command.")
-        return
-
-    second_word = words[1].strip('.,!?:;').lower()
-    if second_word in ["google", "youtube", "gmail", "amazon", "volume", "run", "launch", "open"]:
-        if second_word == "google":
-            if computergoogle_isenabled:
-                ComputerGoogle(title)
-            else:
-                log_disabled_integration("ComputerGoogle")
-        elif second_word == "youtube":
-            if computeryoutube_isenabled:
-                ComputerYoutube(title)
-            else:
-                log_disabled_integration("ComputerYoutube")
-        elif second_word == "gmail":
-            if computergmail_isenabled:
-                ComputerGmail(title)
-            else:
-                log_disabled_integration("ComputerGmail")
-        elif second_word == "amazon":
-            if computeramazon_isenabled:
-                ComputerAmazon(title)
-            else:
-                log_disabled_integration("ComputerAmazon")
-        elif second_word == "volume":
-            if computervolume_isenabled:
-                ComputerVolume(title)
-            else:
-                log_disabled_integration("ComputerVolume")
-        elif second_word in ["run", "launch", "open"]:
-            if computerrun_isenabled:
-                ComputerRun(title)
-            else:
-                log_disabled_integration("ComputerRun")
-    else:
-        logging.error("Unknown Computer command or the integration is not enabled.")
-
 ############################
 #      ComputerGoogle      #
 ############################
@@ -259,3 +214,24 @@ def ComputerRun(title):
         logging.info(f"Executed command: {command}")
     except Exception as e:
         logging.error(f"Failed to execute command: {e}")
+
+################################
+#         ComputerSite         #
+################################
+
+computersite_isenabled = True
+
+def ComputerSite(title):
+    title_cleaned = re.sub(r'[^\w\s]', '', title).lower()
+    words = title.split()
+    if len(words) < 3:
+        logging.error("Invalid prompt format for Computer Site command.")
+        return
+
+    website = " ".join(words[2:])
+
+    try:
+        webbrowser.open(website)
+        logging.info(f"Opened website: {website}")
+    except Exception as e:
+        logging.error(f"Failed to open website: {e}")

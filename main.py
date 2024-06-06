@@ -53,7 +53,7 @@ def main():
                     logging.info(f"Task: {task}")
                     CombinedParse(page, task)
 
-                    # Append the new prompt to the transcript
+                    # Append the completed interaction to the transcript
                     chat = {
                         "user prompt": prompt,
                         "LLM response": promptParsed

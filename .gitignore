@@ -25,3 +25,10 @@ state/state.json
 utils/llm_parse_tester.py
 contacts.vcf
 contacts.json
+/state.json
+db.sqlite3
+/db.sqlite3
+db.sqlite3/
+/migrations
+migrations
+migrations/

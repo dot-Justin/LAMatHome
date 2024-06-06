@@ -1,6 +1,6 @@
 import logging
 import os
-from utils.helpers import log_disabled_integration
+from LAH_HOME_APP_MAIN.utils.helpers import log_disabled_integration
 
 telegram_isenabled = True
 telegramtext_isenabled = True

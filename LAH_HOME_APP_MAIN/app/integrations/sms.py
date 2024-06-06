@@ -2,8 +2,8 @@ import os
 import sys
 import pytextnow
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),'..')))
-from utils.get_env import TEXT_CSRF, TEXT_USERNAME, TEXT_SID
-from utils.determine_contact import *
+from LAH_HOME_APP_MAIN.utils.get_env import TEXT_CSRF, TEXT_USERNAME, TEXT_SID
+from LAH_HOME_APP_MAIN.utils.determine_contact import *
 
 client = pytextnow.Client(TEXT_USERNAME, sid_cookie=TEXT_SID, csrf_cookie=TEXT_CSRF)
 

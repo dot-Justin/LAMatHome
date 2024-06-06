@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>LAM Home</title>
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="{% url 'main:journal-list' %}">Journal</a></li>
+            <li><a href="{% url 'main:contact-list' %}">Contacts</a></li>
+            <li><a href="{% url 'main:settings' %}">Settings</a></li>
+        </ul>
+    </nav>
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

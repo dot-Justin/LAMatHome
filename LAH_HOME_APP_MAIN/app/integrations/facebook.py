@@ -1,5 +1,5 @@
 import logging
-from utils.get_env import FB_EMAIL, FB_PASS
+from LAH_HOME_APP_MAIN.utils.get_env import FB_EMAIL, FB_PASS
 
 logged_in = False
 

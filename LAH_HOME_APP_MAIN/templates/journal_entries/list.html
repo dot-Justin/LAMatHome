@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>Journal Entries</h1>
+  <ul>
+    {% for entry in object_list %}
+      <li>
+        <h2>{{ entry.title }}</h2>
+        <p>{{ entry.content }}</p>
+        <p>Created: {{ entry.created_at }}</p>
+      </li>
+    {% endfor %}
+  </ul>
+{% endblock %}

@@ -1,13 +1,13 @@
 import os
 import logging
 from groq import Groq
-from utils.get_env import GROQ_API_KEY
-from integrations.telegram import telegram_isenabled, telegramtext_isenabled, TelegramText
-from integrations.computer import computer_isenabled, computergoogle_isenabled, computeryoutube_isenabled, computergmail_isenabled, computeramazon_isenabled, computervolume_isenabled, computerrun_isenabled, ComputerGoogle, ComputerYoutube, ComputerGmail, ComputerAmazon, ComputerVolume, ComputerRun
-from integrations.discord import discord_isenabled, discordtext_isenabled, DiscordText
-from integrations.facebook import facebook_isenabled, facebooktext_isenabled, FacebookText
-from integrations.sms import send_sms, send_mms
-from utils.helpers import log_disabled_integration
+from LAH_HOME_APP_MAIN.utils.get_env import GROQ_API_KEY
+from LAH_HOME_APP_MAIN.integrations.telegram import telegram_isenabled, telegramtext_isenabled, TelegramText
+from LAH_HOME_APP_MAIN.integrations.computer import computer_isenabled, computergoogle_isenabled, computeryoutube_isenabled, computergmail_isenabled, computeramazon_isenabled, computervolume_isenabled, computerrun_isenabled, ComputerGoogle, ComputerYoutube, ComputerGmail, ComputerAmazon, ComputerVolume, ComputerRun
+from LAH_HOME_APP_MAIN.integrations.discord import discord_isenabled, discordtext_isenabled, DiscordText
+from LAH_HOME_APP_MAIN.integrations.facebook import facebook_isenabled, facebooktext_isenabled, FacebookText
+from LAH_HOME_APP_MAIN.integrations.sms import send_sms, send_mms
+from LAH_HOME_APP_MAIN.utils.helpers import log_disabled_integration
 
 def get_api_configuration():
     if GROQ_API_KEY:

@@ -4,7 +4,7 @@ import webbrowser
 import ctypes
 import logging
 import time
-from utils.helpers import log_disabled_integration
+from LAH_HOME_APP_MAIN.utils.helpers import log_disabled_integration
 
 computer_isenabled = True
 

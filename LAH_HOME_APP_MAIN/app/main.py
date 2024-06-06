@@ -3,12 +3,11 @@ import json
 import logging
 import coloredlogs
 from datetime import datetime
-from utils.ui import create_ui
-from utils.llm_parse import LLMParse, CombinedParse
-from utils.journals import journal_entries_generator
-from utils.splashscreen import colored_splash
-from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
-
+from LAH_HOME_APP_MAIN.utils.ui import create_ui
+from LAH_HOME_APP_MAIN.utils.llm_parse import LLMParse, CombinedParse
+from LAH_HOME_APP_MAIN.utils.journals import journal_entries_generator
+from LAH_HOME_APP_MAIN.utils.splashscreen import colored_splash
+from playwright.sync_api import sync_playwright
 # --- Main execution ---
 def main():
 

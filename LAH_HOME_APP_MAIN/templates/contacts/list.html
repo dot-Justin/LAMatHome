@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>Contacts</h1>
+  <ul>
+    {% for contact in object_list %}
+      <li>
+        <h2>{{ contact.name }}</h2>
+        <p>Email: {{ contact.email }}</p>
+        <p>Phone: {{ contact.phone }}</p>
+      </li>
+    {% endfor %}
+  </ul>
+{% endblock %}

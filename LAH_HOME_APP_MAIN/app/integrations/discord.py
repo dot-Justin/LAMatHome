@@ -1,5 +1,5 @@
 import logging
-from utils.get_env import DC_EMAIL, DC_PASS
+from LAH_HOME_APP_MAIN.utils.get_env import DC_EMAIL, DC_PASS
 import time
 
 discord_isenabled = True

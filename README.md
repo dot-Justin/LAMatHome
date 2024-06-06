@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="/LAM_HOME_APP_MAIN/app/assets/LAH_splash.png" alt="LAMAtHome" width="600"/>
+  <img src="LAH_HOME_APP_MAIN/app/assets/LAH_splash.png" alt="LAMAtHome" width="600"/>
 </p>
 
 <p align="center">

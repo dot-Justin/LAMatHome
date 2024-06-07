@@ -169,17 +169,19 @@ def LLMParse(user_prompt, transcript=None, temperature=0.1, top_p=1):
         logging.error(f"An error occurred: {e}")
         raise ValueError(f"Failed to get response from API: {e}")
 
-def CombinedParse(page, text):
+def CombinedParse(browser, text):
     words = text.split()
     if len(words) <= 1:
         logging.error("Command did not provide enough parameters.")
         return
-
+    
+    context = browser.new_context(storage_state="state/state.json")  # Use state to stay logged in
     integration = words[0].strip('.,!?:;"').lower()
     recipient = words[1].strip('.,!?:;"').lower()
     message = ' '.join(words[2:]).strip()
 
     if integration == "telegram":
+        page = context.new_page()  # Open a new page
         if telegram_isenabled:
             if telegramtext_isenabled:
                 TelegramText(page, recipient, message)
@@ -188,6 +190,7 @@ def CombinedParse(page, text):
         else:
             log_disabled_integration("Telegram")
     elif integration == "discord":
+        page = context.new_page()  # Open a new page
         if discord_isenabled:
             if discordtext_isenabled:
                 DiscordText(page, recipient, message)
@@ -196,6 +199,7 @@ def CombinedParse(page, text):
         else:
             log_disabled_integration("Discord")
     elif integration == "facebook":
+        page = context.new_page()  # Open a new page
         if facebook_isenabled:
             if facebooktext_isenabled:
                 FacebookText(page, recipient, message)

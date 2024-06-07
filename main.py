@@ -34,36 +34,32 @@ def main():
     transcript = deque(maxlen=5)
 
     with sync_playwright() as p:
-        browser = p.firefox.launch(headless=False) # Use firefox for full headless. If this gets stuck at any point, set to True, and try again.
-        context = browser.new_context(storage_state=state_file)  # Use state to stay logged in
-        page = context.new_page()  # Open a new page
+        # Use firefox for full headless
+        browser = p.firefox.launch(headless=False) 
+        
+        for journal in journal_entries_generator(datetime.utcnow().isoformat() + 'Z'):
+            # grab prompt from journal
+            prompt = journal['utterance']['prompt']
+            logging.info(f"Prompt: {prompt}")
 
-        if not page.is_closed():
-            for journal in journal_entries_generator(datetime.utcnow().isoformat() + 'Z'):
-                # grab prompt from journal
-                prompt = journal['utterance']['prompt']
-                logging.info(f"Prompt: {prompt}")
+            # split prompt into tasks
+            promptParsed = LLMParse(prompt, transcript)
+            tasks = promptParsed.split("&&")
+            
+            # iterate through tasks and execute each sequentially
+            for task in tasks:
+                logging.info(f"Task: {task}")
+                CombinedParse(browser, task)
 
-                # split prompt into tasks
-                promptParsed = LLMParse(prompt, transcript)
-                tasks = promptParsed.split("&&")
-                
-                # iterate through tasks and execute each sequentially
-                for task in tasks:
-                    logging.info(f"Task: {task}")
-                    CombinedParse(page, task)
-
-                    # Append the completed interaction to the transcript
-                    chat = {
-                        "user prompt": prompt,
-                        "LLM response": promptParsed
-                    }
-                    transcript.append(chat)
-        else:
-            logging.error("The page has been closed. Exiting...")
+                # Append the completed interaction to the transcript
+                chat = {
+                    "user prompt": prompt,
+                    "LLM response": promptParsed
+                }
+                transcript.append(chat)
 
 if __name__ == "__main__":
-    # --- Start Application ---
+    # configure logging and run LAMatHome
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
     coloredlogs.install(
         level='INFO', 

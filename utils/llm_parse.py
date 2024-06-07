@@ -96,7 +96,7 @@ def LLMParse(user_prompt, transcript=None, temperature=0.1, top_p=1):
             For commands involving a correct structure and integrated service, provide the rigid command.
             For requests to open a specific site, if you are aware of the site's existence, open it.
             For multiple commands, choose the most important one and respond with the formatted command. Ignore the rest.
-            Your output should be the command only, with no quoatations. Our server may break if the existence of quotation marks is detected.
+            Your output should be the command only, with no quotations. Our server may break if the existence of quotation marks is detected.
             Additional Examples:
 
             Telegram Jason → Respond with x. (Missing Message variable)

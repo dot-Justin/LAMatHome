@@ -1,20 +1,18 @@
 import os
+import re
 import logging
 from groq import Groq
-from utils.get_env import GROQ_API_KEY
-from integrations.telegram import telegram_isenabled, telegramtext_isenabled, TelegramText
-from integrations.computer import computer_isenabled, computervolume_isenabled, computerrun_isenabled, computermedia_isenabled, ComputerVolume, ComputerRun, ComputerMedia
-from integrations.browser import browser_isenabled, browsersite_isenabled, browsergoogle_isenabled, browseryoutube_isenabled, browsergmail_isenabled, browseramazon_isenabled, BrowserSite, BrowserGoogle, BrowserYoutube, BrowserGmail, BrowserAmazon
-from integrations.discord import discord_isenabled, discordtext_isenabled, DiscordText
-from integrations.facebook import facebook_isenabled, facebooktext_isenabled, FacebookText
-from integrations.lamathome import lamathome_isenabled, lamathometerminate_isenabled, terminate
-from utils.helpers import log_disabled_integration
+from utils import get_env, config, helpers
+from integrations import telegram, computer, browser, discord, facebook, lamathome
+
 
 def get_api_configuration():
+    GROQ_API_KEY = get_env.GROQ_API_KEY
     if GROQ_API_KEY:
         return GROQ_API_KEY
     else:
         raise ValueError("No valid API key found. Please set GROQ_API_KEY in your environment variables.")
+
 
 def LLMParse(user_prompt, transcript=None, temperature=0.1, top_p=1):
     api_key = get_api_configuration()
@@ -166,7 +164,6 @@ def LLMParse(user_prompt, transcript=None, temperature=0.1, top_p=1):
             logging.info(f"Response text: {response_text}")
 
             # Extract command enclosed in backticks, if any
-            import re
             match = re.search(r'`([^`]+)`', response_text)
             if match:
                 response_text = match.group(1)
@@ -180,6 +177,7 @@ def LLMParse(user_prompt, transcript=None, temperature=0.1, top_p=1):
         logging.error(f"An error occurred: {e}")
         raise ValueError(f"Failed to get response from API: {e}")
 
+
 def CombinedParse(context, text):
     words = text.split()
     if len(words) <= 1:
@@ -192,100 +190,99 @@ def CombinedParse(context, text):
 
     if integration == "telegram":
         page = context.new_page()  # Open a new page
-        if telegram_isenabled:
-            if telegramtext_isenabled:
-                TelegramText(page, recipient, message)
+        if config.config["telegram_isenabled"]:
+            if config.config["telegramtext_isenabled"]:
+                telegram.TelegramText(page, recipient, message)
             else:
-                log_disabled_integration("TelegramText")
+                helpers.log_disabled_integration("TelegramText")
         else:
-            log_disabled_integration("Telegram")
+            helpers.log_disabled_integration("Telegram")
     elif integration == "discord":
         page = context.new_page()  # Open a new page
-        if discord_isenabled:
-            if discordtext_isenabled:
-                DiscordText(page, recipient, message)
+        if config.config["discord_isenabled"]:
+            if config.config["discordtext_isenabled"]:
+                discord.DiscordText(page, recipient, message)
             else:
-                log_disabled_integration("DiscordText")
+                helpers.log_disabled_integration("DiscordText")
         else:
-            log_disabled_integration("Discord")
+            helpers.log_disabled_integration("Discord")
     elif integration == "facebook":
         page = context.new_page()  # Open a new page
-        if facebook_isenabled:
-            if facebooktext_isenabled:
-                FacebookText(page, recipient, message)
+        if config.config["facebook_isenabled"]:
+            if config.config["facebooktext_isenabled"]:
+                facebook.FacebookText(page, recipient, message)
             else:
-                log_disabled_integration("FacebookText")
+                helpers.log_disabled_integration("FacebookText")
         else:
-            log_disabled_integration("Facebook")
+            helpers.log_disabled_integration("Facebook")
     elif integration == "computer":
-        if not computer_isenabled:
-            log_disabled_integration("Computer")
+        if not config.config["computer_isenabled"]:
+            helpers.log_disabled_integration("Computer")
             return
 
-        if recipient in ["volume", "run", "site"]:
+        if recipient in ["volume", "run", "media"]:
             if recipient == "volume":
-                if computervolume_isenabled:
-                    ComputerVolume(text)
+                if config.config["computervolume_isenabled"]:
+                    computer.ComputerVolume(text)
                 else:
-                    log_disabled_integration("ComputerVolume")
+                    helpers.log_disabled_integration("ComputerVolume")
             elif recipient == "run":
-                if computerrun_isenabled:
-                    ComputerRun(text)
+                if config.config["computerrun_isenabled"]:
+                    computer.ComputerRun(text)
                 else:
-                    log_disabled_integration("ComputerSite")
+                    helpers.log_disabled_integration("ComputerSite")
             elif recipient == "media":
-                if computermedia_isenabled:
-                    ComputerMedia(text)
+                if config.config["computermedia_isenabled"]:
+                    computer.ComputerMedia(text)
                 else:
-                    log_disabled_integration("ComputerMedia")
-
+                    helpers.log_disabled_integration("ComputerMedia")
         else:
             logging.error("Unknown Computer command or the integration is not enabled.")
 
     elif integration == "browser":
-        if not browser_isenabled:
-            log_disabled_integration("Browser")
+        if not config.config["browser_isenabled"]:
+            helpers.log_disabled_integration("Browser")
             return
         
         if recipient in ["site", "google", "youtube", "gmail", "amazon"]:
             search = message.strip()
 
             if recipient == "site":
-                if browsersite_isenabled:
-                    BrowserSite(message)
+                if config.config["browsersite_isenabled"]:
+                    browser.BrowserSite(message)
                 else:
-                    log_disabled_integration("BrowserSite")
+                    helpers.log_disabled_integration("BrowserSite")
             elif recipient == "google":
-                if browsergoogle_isenabled:
-                    BrowserGoogle(message)
+                if config.config["browsergoogle_isenabled"]:
+                    browser.BrowserGoogle(message)
                 else:
-                    log_disabled_integration("BrowserGoogle")
+                    helpers.log_disabled_integration("BrowserGoogle")
             elif recipient == "youtube":
-                if browseryoutube_isenabled:
-                    BrowserYoutube(message)
+                if config.config["browseryoutube_isenabled"]:
+                    browser.BrowserYoutube(message)
                 else:
-                    log_disabled_integration("BrowserYoutube")
+                    helpers.log_disabled_integration("BrowserYoutube")
             elif recipient == "gmail":
-                if browsergmail_isenabled:
-                    BrowserGmail(message)
+                if config.config["browsergmail_isenabled"]:
+                    browser.BrowserGmail(message)
                 else:
-                    log_disabled_integration("BrowserGmail")
+                    helpers.log_disabled_integration("BrowserGmail")
             elif recipient == "amazon":
-                if browseramazon_isenabled:
-                    BrowserAmazon(message)
+                if config.config["browseramazon_isenabled"]:
+                    browser.BrowserAmazon(message)
                 else:
-                    log_disabled_integration("BrowserAmazon")
+                    helpers.log_disabled_integration("BrowserAmazon")
         else:
             logging.error("Unknown Browser command or the integration is not enabled.")
 
     elif integration == "lamathome":
-        if not lamathome_isenabled:
-            log_disabled_integration("LAMatHome")
+        if not config.config["lamathome_isenabled"]:
+            helpers.log_disabled_integration("LAMatHome")
             return
 
         if recipient == "terminate":
-            if lamathometerminate_isenabled:
-                terminate()
+            if config.config["lamathometerminate_isenabled"]:
+                lamathome.terminate()
             else:
                 logging.error("Unknown LAMatHome command or the integration is not enabled.")
 

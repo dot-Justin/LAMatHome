@@ -4,54 +4,50 @@ import logging
 import coloredlogs
 from datetime import datetime, timezone
 from collections import deque
-from utils.ui import create_ui
-from utils.llm_parse import LLMParse, CombinedParse
-from utils.rabbithole import journal_entries_generator
-from utils.splashscreen import colored_splash
+from utils import config, ui, llm_parse, rabbithole, splashscreen
 from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
 
 
 def main():
     try:
-        # Check if .env exists, if not run ui.py to create it
-        if not os.path.exists(".env"):
-            create_ui()
-        print(colored_splash)
+        # Check if env file exists, if not run ui.py to create it
+        if not os.path.exists(config.config["env_file"]):
+            ui.create_ui()
+        print(splashscreen.colored_splash)
         logging.info("LAMAtHome has started!")
 
         # create cache directory if it doesn't exist
-        cacheDir = "cache"
-        if not os.path.exists(cacheDir):
-            os.makedirs(cacheDir)
+        if not os.path.exists(config.config['cache_dir']):
+            os.makedirs(config.config['cache_dir'])
 
         # Ensure state.json exists and is valid
-        state_file = os.path.join(cacheDir, "state.json")
+        state_file = os.path.join(config.config['cache_dir'], config.config['state_file'])
         if not os.path.exists(state_file) or os.stat(state_file).st_size == 0:
             with open(state_file, 'w') as f:
                 json.dump({}, f)
 
         # Initialize queue for storing rolling transcript
-        transcript = deque(maxlen=5)
+        transcript = deque(maxlen=config.config['rolling_transcript_size'])
 
         with sync_playwright() as p:
             # Use firefox for full headless
             browser = p.firefox.launch(headless=False)
-            context = browser.new_context(storage_state="cache/state.json")  # Use state to stay logged in
+            context = browser.new_context(storage_state=state_file)  # Use state to stay logged in
             
             currentTimeIso = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
-            for journal in journal_entries_generator(currentTimeIso):
+            for journal in rabbithole.journal_entries_generator(currentTimeIso):
                 # grab prompt from journal
                 prompt = journal['utterance']['prompt']
                 logging.info(f"Prompt: {prompt}")
 
                 # split prompt into tasks
-                promptParsed = LLMParse(prompt, transcript)
+                promptParsed = llm_parse.LLMParse(prompt, transcript)
                 tasks = promptParsed.split("&&")
                 
                 # iterate through tasks and execute each sequentially
                 for task in tasks:
                     logging.info(f"Task: {task}")
-                    CombinedParse(context, task)
+                    llm_parse.CombinedParse(context, task)
 
                     # Append the completed interaction to the transcript
                     chat = {

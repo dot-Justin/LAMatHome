@@ -3,6 +3,7 @@ import time
 import logging
 import requests
 from datetime import datetime, timezone
+from utils.config import config
 from utils.get_env import RH_ACCESS_TOKEN
 
 # Configure logging
@@ -41,7 +42,7 @@ def handle_request_errors(func):
             if e.response.status_code == 500:
                 error_count += 1
                 logging.error(f"Server error: {e} when calling {func.__name__}")
-                if error_count > 1:
+                if error_count == config["rabbithole_api_max_retry"]:
                     logging.error("Max retries exceeded. Terminating...")
                     sys.exit()
             logging.error(f"HTTP error: {e}")
@@ -99,7 +100,6 @@ def get_journals(before=None, after=None):
     if before and not is_valid_iso_format(before):
         raise ValueError("Invalid 'before' timestamp format")
     if after and not is_valid_iso_format(after):
-        print(after)
         raise ValueError("Invalid 'after' timestamp format")
     if before and after and before <= after:
         raise ValueError("'before' timestamp must be after 'after' timestamp")
@@ -132,14 +132,15 @@ def journal_entries_generator(after_timestamp, intention_filter=None):
             after_timestamp = new_entries[-1]['createdOn']
         else:
             # If no new entries, wait for a while before checking again
-            time.sleep(2)
+            time.sleep(config["rabbithole_api_sleep_time"])
 
 
 if __name__ == "__main__":
-    # Example usage of the journal_entries_generator, filtering only for conversations
+    # Example usage of the journal_entries_generator
+    # filtering only for journals marked with conversation intent
     # Assuming the initial after_timestamp is the current time in ISO format
     initial_timestamp = currentTimeIso = datetime.now(timezone.utc).isoformat() + 'Z'
-    generator = journal_entries_generator(initial_timestamp, "CONVERSATION")
+    generator = journal_entries_generator(initial_timestamp, ["CONVERSATION"])
 
     # Print the journal entries as they come in real-time
     for entry in generator:

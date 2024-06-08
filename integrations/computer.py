@@ -1,24 +1,18 @@
 import re
+import time
 import ctypes
 import logging
-import time
 from utils.helpers import log_disabled_integration
 
-computer_isenabled = True
 
 ############################
 #      ComputerVolume      #
 ############################
 
-computervolume_isenabled = True
-
 vol_up_step_value = 4
 vol_down_step_value = 4
 
 def ComputerVolume(title):
-    if not computervolume_isenabled:
-        log_disabled_integration("ComputerVolume")
-        return
 
     title_cleaned = re.sub(r'[^\w\s]', '', title).lower()
 

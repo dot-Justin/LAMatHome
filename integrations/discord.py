@@ -1,9 +1,8 @@
+import time
 import logging
 from utils.get_env import DC_EMAIL, DC_PASS
-import time
 
-discord_isenabled = True
-discordtext_isenabled = True
+
 dc_logged_in = False
 
 def login_discord(page):

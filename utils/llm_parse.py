@@ -169,13 +169,12 @@ def LLMParse(user_prompt, transcript=None, temperature=0.1, top_p=1):
         logging.error(f"An error occurred: {e}")
         raise ValueError(f"Failed to get response from API: {e}")
 
-def CombinedParse(browser, text):
+def CombinedParse(context, text):
     words = text.split()
     if len(words) <= 1:
         logging.error("Command did not provide enough parameters.")
         return
     
-    context = browser.new_context(storage_state="state/state.json")  # Use state to stay logged in
     integration = words[0].strip('.,!?:;"').lower()
     recipient = words[1].strip('.,!?:;"').lower()
     message = ' '.join(words[2:]).strip()

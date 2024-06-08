@@ -1,16 +1,9 @@
 import logging
-import os
-from utils.helpers import log_disabled_integration
 
-telegram_isenabled = True
-telegramtext_isenabled = True
 
 def TelegramText(page, recipient, message):
-    if not telegramtext_isenabled:
-        return
 
     session_file = "cache/state.json"
-
     context = page.context
     page = context.new_page()
     page.goto("https://web.telegram.org/k/")

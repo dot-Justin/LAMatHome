@@ -1,10 +1,8 @@
 import logging
 from utils.get_env import FB_EMAIL, FB_PASS
 
-logged_in = False
 
-facebook_isenabled = True
-facebooktext_isenabled = True
+logged_in = False
 
 def FacebookText(page, recipient, message):
     """Opens Facebook Messenger, logs in (if needed),

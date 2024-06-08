@@ -1,15 +1,11 @@
+import logging
 import urllib.parse
 import webbrowser
-import logging
-from utils.helpers import log_disabled_integration
 
-browser_isenabled=True
 
 ###############################
 #         BrowserSite         #
 ###############################
-
-browsersite_isenabled = True
 
 def BrowserSite(title):
     try:

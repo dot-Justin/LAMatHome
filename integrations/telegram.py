@@ -5,7 +5,7 @@ from utils.helpers import log_disabled_integration
 telegram_isenabled = True
 telegramtext_isenabled = True
 
-def TelegramText(page, recipient, message):
+async def TelegramText(page, recipient, message):
     if not telegramtext_isenabled:
         return
 

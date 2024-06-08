@@ -5,6 +5,6 @@ lamathome_isenabled = True
 lamathometerminate_isenabled = True
 
 # Function to sys.exit to terminate LAH
-def terminate():
+async def terminate():
     print(colored_splash_goodbye)
     sys.exit()

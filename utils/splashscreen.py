@@ -72,7 +72,7 @@ def apply_gradient(text, start_color, end_color):
 
 # Function to apply a rainbow gradient
 def apply_rainbow_gradient(text):
-    def color_to_ansi(r, g, b):
+    async def color_to_ansi(r, g, b):
         return f'\033[38;2;{r};{g};{b}m'
     
     rainbow_colors = [

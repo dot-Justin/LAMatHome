@@ -14,7 +14,7 @@ computer_isenabled = True
 
 computergoogle_isenabled = True
 
-def ComputerGoogle(title):
+async def ComputerGoogle(title):
     if not computergoogle_isenabled:
         return
 
@@ -36,7 +36,7 @@ def ComputerGoogle(title):
 
 computeryoutube_isenabled = True
 
-def ComputerYoutube(title):
+async def ComputerYoutube(title):
     if not computeryoutube_isenabled:
         return
 
@@ -58,7 +58,7 @@ def ComputerYoutube(title):
 
 computergmail_isenabled = True
 
-def ComputerGmail(title):
+async def ComputerGmail(title):
     if not computergmail_isenabled:
         return
 
@@ -80,7 +80,7 @@ def ComputerGmail(title):
 
 computeramazon_isenabled = True
 
-def ComputerAmazon(title):
+async def ComputerAmazon(title):
     if not computeramazon_isenabled:
         return
 
@@ -105,7 +105,7 @@ computervolume_isenabled = True
 vol_up_step_value = 4
 vol_down_step_value = 4
 
-def ComputerVolume(title):
+async def ComputerVolume(title):
     if not computervolume_isenabled:
         log_disabled_integration("ComputerVolume")
         return
@@ -180,7 +180,7 @@ def ComputerVolume(title):
 
 computerrun_isenabled = True
 
-def ComputerRun(title):
+async def ComputerRun(title):
     if not computerrun_isenabled:
         log_disabled_integration("ComputerRun")
         return
@@ -221,9 +221,9 @@ def ComputerRun(title):
 
 computersite_isenabled = True
 
-def ComputerSite(title):
+async def ComputerSite(title):
     title_cleaned = re.sub(r'[^\w\s]', '', title).lower()
-    words = title.split()
+    words = title_cleaned.split()
     if len(words) < 3:
         logging.error("Invalid prompt format for Computer Site command.")
         return

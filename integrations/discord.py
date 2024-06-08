@@ -6,7 +6,7 @@ discord_isenabled = True
 discordtext_isenabled = True
 dc_logged_in = False
 
-def login_discord(page):
+async def login_discord(page):
     """Logs into Discord and saves authentication cookies."""
     global dc_logged_in
     if not dc_logged_in:
@@ -22,7 +22,7 @@ def login_discord(page):
     else:
         logging.info("Already logged into Discord.")
 
-def DiscordText(page, recipient, message):
+async def DiscordText(page, recipient, message):
     """Sends a message to a specific recipient on Discord."""
     global dc_logged_in
     if not dc_logged_in:

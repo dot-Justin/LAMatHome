@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 
-def create_env_file():
+async def create_env_file():
     """Creates a .env file with user-provided credentials."""
     try:
         rh_access_token = rh_access_token_entry.get()
@@ -23,7 +23,7 @@ def create_env_file():
     except Exception as e:
         messagebox.showerror("Error", f"An error occurred: {e}")
 
-def create_ui():
+async def create_ui():
     """Creates and runs the UI for credential input."""
     global root, rh_access_token_entry, fb_email_entry, fb_pass_entry, dc_email_entry, dc_pass_entry, groq_api_key_entry
     root = tk.Tk()

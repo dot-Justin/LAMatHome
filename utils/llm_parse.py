@@ -9,14 +9,14 @@ from integrations.facebook import facebook_isenabled, facebooktext_isenabled, Fa
 from integrations.lamathome import lamathome_isenabled, lamathometerminate_isenabled, terminate
 from utils.helpers import log_disabled_integration
 
-def get_api_configuration():
+async def get_api_configuration():
     if GROQ_API_KEY:
         return GROQ_API_KEY
     else:
         raise ValueError("No valid API key found. Please set GROQ_API_KEY in your environment variables.")
 
-def LLMParse(user_prompt, transcript=None, temperature=0.1, top_p=1):
-    api_key = get_api_configuration()
+async def LLMParse(user_prompt, transcript=None, temperature=0.1, top_p=1):
+    api_key = await get_api_configuration()
 
     client = Groq(api_key=api_key)
 
@@ -169,40 +169,40 @@ def LLMParse(user_prompt, transcript=None, temperature=0.1, top_p=1):
         logging.error(f"An error occurred: {e}")
         raise ValueError(f"Failed to get response from API: {e}")
 
-def CombinedParse(browser, text):
+async def CombinedParse(browser, text):
     words = text.split()
     if len(words) <= 1:
         logging.error("Command did not provide enough parameters.")
         return
     
-    context = browser.new_context(storage_state="state/state.json")  # Use state to stay logged in
+    context = await browser.new_context(storage_state="state/state.json")  # Use state to stay logged in
     integration = words[0].strip('.,!?:;"').lower()
     recipient = words[1].strip('.,!?:;"').lower()
     message = ' '.join(words[2:]).strip()
 
     if integration == "telegram":
-        page = context.new_page()  # Open a new page
+        page = await context.new_page()  # Open a new page
         if telegram_isenabled:
             if telegramtext_isenabled:
-                TelegramText(page, recipient, message)
+                await TelegramText(page, recipient, message)
             else:
                 log_disabled_integration("TelegramText")
         else:
             log_disabled_integration("Telegram")
     elif integration == "discord":
-        page = context.new_page()  # Open a new page
+        page = await context.new_page()  # Open a new page
         if discord_isenabled:
             if discordtext_isenabled:
-                DiscordText(page, recipient, message)
+                await DiscordText(page, recipient, message)
             else:
                 log_disabled_integration("DiscordText")
         else:
             log_disabled_integration("Discord")
     elif integration == "facebook":
-        page = context.new_page()  # Open a new page
+        page = await context.new_page()  # Open a new page
         if facebook_isenabled:
             if facebooktext_isenabled:
-                FacebookText(page, recipient, message)
+                await FacebookText(page, recipient, message)
             else:
                 log_disabled_integration("FacebookText")
         else:
@@ -215,35 +215,35 @@ def CombinedParse(browser, text):
         if recipient in ["google", "youtube", "gmail", "amazon", "volume", "run", "site"]:
             if recipient == "google":
                 if computergoogle_isenabled:
-                    ComputerGoogle(text)
+                    await ComputerGoogle(text)
                 else:
                     log_disabled_integration("ComputerGoogle")
             elif recipient == "youtube":
                 if computeryoutube_isenabled:
-                    ComputerYoutube(text)
+                    await ComputerYoutube(text)
                 else:
                     log_disabled_integration("ComputerYoutube")
             elif recipient == "gmail":
                 if computergmail_isenabled:
-                    ComputerGmail(text)
+                    await ComputerGmail(text)
                 else:
                     log_disabled_integration("ComputerGmail")
             elif recipient == "amazon":
                 if computeramazon_isenabled:
-                    ComputerAmazon(text)
+                    await ComputerAmazon(text)
                 else:
                     log_disabled_integration("ComputerAmazon")
             elif recipient == "volume":
                 if computervolume_isenabled:
-                    ComputerVolume(text)
+                    await ComputerVolume(text)
                 else:
                     log_disabled_integration("ComputerVolume")
             elif recipient == "run":
                 if computerrun_isenabled:
-                    ComputerRun(text)
+                    await ComputerRun(text)
             elif recipient == "site":
                 if computersite_isenabled:
-                    ComputerSite(text)
+                    await ComputerSite(text)
                 else:
                     log_disabled_integration("ComputerRun")
         else:
@@ -255,7 +255,7 @@ def CombinedParse(browser, text):
 
         if recipient == "terminate":
             if lamathometerminate_isenabled:
-                terminate()
+                await terminate()
             else:
                 logging.error("Unknown LAMatHome command or the integration is not enabled.")
 

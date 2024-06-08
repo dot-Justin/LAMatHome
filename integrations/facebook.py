@@ -6,7 +6,7 @@ logged_in = False
 facebook_isenabled = True
 facebooktext_isenabled = True
 
-def FacebookText(page, recipient, message):
+async def FacebookText(page, recipient, message):
     """Opens Facebook Messenger, logs in (if needed),
         finds the recipient, and sends a message.
     """

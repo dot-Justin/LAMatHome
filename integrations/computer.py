@@ -1,100 +1,10 @@
 import re
-import urllib.parse
-import webbrowser
 import ctypes
 import logging
 import time
 from utils.helpers import log_disabled_integration
 
 computer_isenabled = True
-
-############################
-#      ComputerGoogle      #
-############################
-
-computergoogle_isenabled = True
-
-def ComputerGoogle(title):
-    if not computergoogle_isenabled:
-        return
-
-    words = title.split()
-    if len(words) < 3:
-        logging.error("Invalid prompt format for Computer Google command.")
-        return
-
-    query = " ".join(words[2:])
-    encoded_query = urllib.parse.quote(query)
-    url = f"https://www.google.com/search?q={encoded_query}"
-
-    webbrowser.open(url)
-    logging.info(f"Opened Google search for query: {query}")
-
-############################
-#      ComputerYoutube     #
-############################
-
-computeryoutube_isenabled = True
-
-def ComputerYoutube(title):
-    if not computeryoutube_isenabled:
-        return
-
-    words = title.split()
-    if len(words) < 3:
-        logging.error("Invalid prompt format for Computer Youtube command.")
-        return
-
-    query = " ".join(words[2:])
-    encoded_query = urllib.parse.quote(query)
-    url = f"https://www.youtube.com/results?search_query={encoded_query}"
-
-    webbrowser.open(url)
-    logging.info(f"Opened YouTube search for query: {query}")
-
-##########################
-#      ComputerGmail     #
-##########################
-
-computergmail_isenabled = True
-
-def ComputerGmail(title):
-    if not computergmail_isenabled:
-        return
-
-    words = title.split()
-    if len(words) < 3:
-        logging.error("Invalid prompt format for Computer Gmail command.")
-        return
-
-    query = " ".join(words[2:])
-    encoded_query = urllib.parse.quote(query)
-    url = f"https://mail.google.com/mail/u/0/#search/{encoded_query}"
-
-    webbrowser.open(url)
-    logging.info(f"Opened Gmail search for query: {query}")
-
-###########################
-#      ComputerAmazon     #
-###########################
-
-computeramazon_isenabled = True
-
-def ComputerAmazon(title):
-    if not computeramazon_isenabled:
-        return
-
-    words = title.split()
-    if len(words) < 3:
-        logging.error("Invalid prompt format for Computer Amazon command.")
-        return
-
-    query = " ".join(words[2:])
-    encoded_query = urllib.parse.quote(query)
-    url = f"https://www.amazon.com/s?k={encoded_query}"
-
-    webbrowser.open(url)
-    logging.info(f"Opened Amazon search for query: {query}")
 
 ############################
 #      ComputerVolume      #
@@ -215,23 +125,59 @@ def ComputerRun(title):
     except Exception as e:
         logging.error(f"Failed to execute command: {e}")
 
-################################
-#         ComputerSite         #
-################################
 
-computersite_isenabled = True
+#################################
+#         ComputerMedia         #
+#################################
 
-def ComputerSite(title):
-    title_cleaned = re.sub(r'[^\w\s]', '', title).lower()
+computermedia_isenabled = True
+
+def ComputerMedia(title):
+    if not computermedia_isenabled:
+        log_disabled_integration("ComputerMedia")
+        return
+    
     words = title.split()
+
     if len(words) < 3:
-        logging.error("Invalid prompt format for Computer Site command.")
+        logging.error("Invalid prompt format for Computer Skip command.")
         return
 
-    website = " ".join(words[2:])
-
-    try:
-        webbrowser.open(website)
-        logging.info(f"Opened website: {website}")
-    except Exception as e:
-        logging.error(f"Failed to open website: {e}")
+    if words[2] == "next": # words[2] is the action
+        try:
+            ctypes.windll.user32.keybd_event(0xB0, 0, 0, 0)
+            ctypes.windll.user32.keybd_event(0xB0, 0, 2, 0) # key up event
+            logging.info("Skipped to the next song")
+        except Exception as e:
+            logging.error(f"Failed to skip to the next song: {e}")
+            return
+    elif words[2] == "back":
+        try:
+            ctypes.windll.user32.keybd_event(0xB1, 0, 0, 0)
+            ctypes.windll.user32.keybd_event(0xB1, 0, 2, 0) # key up event
+            logging.info("Skipped to the previous song")
+            return
+        except:
+            logging.error(f"Failed to skip to the previous song: {e}")
+            return
+    elif words[2] == "play":
+        try:
+            ctypes.windll.user32.keybd_event(0xB3, 0, 0, 0)
+            ctypes.windll.user32.keybd_event(0xB3, 0, 2, 0) # key up event
+            logging.info("Play the current song")
+            return
+        except:
+            logging.error(f"Failed to play/pause the current song: {e}")
+            return
+    elif words[2] == "pause":
+        try:
+            ctypes.windll.user32.keybd_event(0xB3, 0, 0, 0)
+            ctypes.windll.user32.keybd_event(0xB3, 0, 2, 0) # key up event
+            logging.info("Pause the current song")
+            return
+        except:
+            logging.error(f"Failed to pause the current song: {e}")
+            return
+    else:
+        logging.error("Invalid prompt format for Computer Skip command.")
+        return

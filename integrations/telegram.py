@@ -9,7 +9,7 @@ def TelegramText(page, recipient, message):
     if not telegramtext_isenabled:
         return
 
-    session_file = "state/state.json"
+    session_file = "cache/state.json"
 
     context = page.context
     page = context.new_page()

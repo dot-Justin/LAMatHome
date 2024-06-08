@@ -36,19 +36,25 @@ Below is a list of our current integrations. This list is kept up-to-date.
 
 ||Name|Category|Description|Example prompt|
 |-|-|-|-|-|
-||[Google](https://google.com)|Search|Searches Google|`Search google on my computer for ______`|
-||[YouTube](https://youtube.com)|Search|Searches YouTube|`Open a YouTube search for ______ on my computer`|
-||[Gmail](https://gmail.com)|Search|Searches Gmail|`Search my emails on my computer for ______`|
-||[Amazon](https://amazon.com)|Search|Searches Amazon|`Search amazon on computer: ______`|
-||Volume|Local Actions|Sets volume, turns up/down, and mutes/unmutes.|`Change the volume on my pc to 50`|
-||Run|Local Actions|Presses Windows key, searches for an app, and runs.|`Open up the chat app for gamers on my computer`|
+||Site|Browser|Opens/Searches in any website|`Open the _____ website`|
+||[Google](https://google.com)|Browser|Searches Google|`Search google on my computer for ______`|
+||[YouTube](https://youtube.com)|Browser|Searches YouTube|`Open a YouTube search for ______ on my computer`|
+||[Gmail](https://gmail.com)|Browser|Searches Gmail|`Search my emails on my computer for ______`|
+||[Amazon](https://amazon.com)|Browser|Searches Amazon|`Search amazon on computer: ______`|
+|❕|Run|Local Actions|Presses Windows key, searches for an app, and runs.|`Open up the chat app for gamers on my computer`|
+|❕|Volume|Local Actions|Sets volume, turns up/down, and mutes/unmutes.|`Change the volume on my pc to 50`|
+||Media|Local Actions|Skips media next/back, pause/unpause|`Pause on my pc`, `Skip twice backwards on my computer`|
 ||LAMatHome|Local Actions|Only integration currently is "terminate", which closes LAH.|`That's enough from you. Close LAM at home.`|
 |⚠️|[Discord](https://discord.com)|Messaging|Sends a message on Discord to a specified person/channel|`Text poke on discord asking when he's going to be back online. Wait, no ask him on telegram. Actually no, discord is good.`|
 |⚠️|[FB Messenger](https://messenger.com)|Messaging|Sends a message on FB Messenger to a specified person|`Ask Justin what he thinks of my new sunglasses. Oh, send that on facebook.`|
 |⚠️|[Telegram](https://web.telegram.org/)|Messaging|Sends a message on Telegram to a specified person|`Message Kevin on telegram asking him when he's gonna PR his new feature`|
 
+
+
 > [!NOTE]
 >
+> *Integrations marked with a* ❕ *need to be saved as a note to work. r1 will interpret these as commands to itself, and not save the query to the rabbithole. This is a result of r1 update 20240603.15/0.8.99(134D8DE) that enabled voice settings.*
+> 
 > *Integrations marked with a ⚠️ are experimental and may send to the incorrect person/channel based on the way the user utterance is transcribed. This is a limitation of the r1, not LLM Parsing.*
 
 ## Quick start guide:
@@ -65,6 +71,8 @@ pip install -r requirements.txt
 playwright install
 ```
 **3. Obtaining your user token from [the rabbithole](https://hole.rabbit.tech/journal/details):**
+
+- *Google Chrome*
    1. Log into the rabbit hole from the link above
    2. Press F12 to bring up the developer console. If this doesn't work, right-click the page, and click inspect. 
    3. Expand the developer console for better viewing
@@ -73,6 +81,17 @@ playwright install
    6. Near the bottom of the middle pane, find and select `fetchUserJournal`.
    7. In the new pane that opened, select `Payload` in the top navigation bar.
    8. Select everything inside the quotes after `accessToken`. This is your user token.
+
+- *Firefox*
+   1. Log into the rabbit hole from the link above
+   2. Press F12 to bring up the developer console. If this doesn't work, right-click the page, and click inspect.
+   3. Expand the developer console for better viewing
+   4. Click the `Network` tab in the top navigation bar.
+   5. Press Ctrl + R to reload the page.
+   6. In the `Network` tab, in the `File` column, find and select `fetchUserJournal`.
+   7. In the new sidebar that opened up, select `Request` in the top navigation bar.
+   8. Select everything inside the quotes after `accessToken`. This is your user token.
+
    Note: Your token will expire 24 hours after you log in. This is out of our control but we are working on a better way.
 
 **4. Obtaining an API key from Groq:**
@@ -88,10 +107,10 @@ playwright install
 >
 >  NEVER share your user tokens or API keys. They will be stored locally in the program and will only be used to authenticate with official API's.
 
+**5. Running LAMatHome and entering your credentials:**
 ```
 py main.py
 ```
-**5. Running LAMatHome and entering your credentials:**
 The first time you run LAMatHome, it will bring up a ui to enter your credentials.
 For any service that you want to use, enter your credentials. The only required values here are:
 - Rabbit Hole Access Token
@@ -108,6 +127,13 @@ Run `main.py` from the root directory
 
 This will start the LAMatHome program, and (as long as your token is valid) you can start giving prompts to r1.
 
+### Telegram integration:
+To get Telegram running and sending texts on your behalf, some setup is required. Follow this guide:
+1. Give LAMatHome any Telegram command. This can be a test, but be aware that the text will be sent after you log in.
+2. A Firefox Nightly window (Playwright instance) will open up and request your sign-in.
+3. Sign in, and watch the text go through. After this, your session is saved and you won't need to log back in for a long while.
+
+
 ### Stopping LAMatHome
 To stop LAMatHome, you have two options.
 1. Via r1 voice prompt (If you can't get this to work, try method 2)
@@ -118,7 +144,7 @@ To stop LAMatHome, you have two options.
    - Press `Ctrl + C` to exit the program. You may see some errors, this is expected and will not mess up your installation.
 
 ### Disabling integrations
-If you don't want to use specific integration, no worries! It's simple:
+If you don't want to use specific integration, no worries!
 1. Open the `integrations/` folder in the your LAMatHome directory.
 2. Open the `.py` file for the integration you'd like to disable (Use your favorite IDE. A good free one is [notepad++](https://notepad-plus-plus.org/downloads/))
 3. Hit `Ctrl + F`, and search for `_isenabled`.
@@ -144,8 +170,8 @@ We plan to make this easier to adjust in the future.
 [![LAMatHome's Contributors](https://stats.deeptrain.net/contributor/dot-justin/LAMatHome/?theme=dark)](https://github.com/dot-justin/LAMatHome/contributors)
 
 ## Acknowledgements:
-- Thanks to poke for the original idea [https://github.com/glovergaytan-fs](rabbitWrighter)
-- Obligatory "There's no way you're that young" [https://github.com/GikitSRC/rabbitt](rabbitt)
+- Thanks to poke for the original idea [rabbitWrighter](https://github.com/glovergaytan-fs/rabbitWrighter)
+- Obligatory "There's no way you're that young" [rabbitt](https://github.com/GikitSRC/rabbitt)
 
 ## License:
 [MIT](https://choosealicense.com/licenses/mit/)

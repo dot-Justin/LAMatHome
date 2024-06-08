@@ -3,7 +3,8 @@ import logging
 from groq import Groq
 from utils.get_env import GROQ_API_KEY
 from integrations.telegram import telegram_isenabled, telegramtext_isenabled, TelegramText
-from integrations.computer import computer_isenabled, computergoogle_isenabled, computeryoutube_isenabled, computergmail_isenabled, computeramazon_isenabled, computervolume_isenabled, computerrun_isenabled, computersite_isenabled, ComputerGoogle, ComputerYoutube, ComputerGmail, ComputerAmazon, ComputerVolume, ComputerRun, ComputerSite
+from integrations.computer import computer_isenabled, computervolume_isenabled, computerrun_isenabled, computermedia_isenabled, ComputerVolume, ComputerRun, ComputerMedia
+from integrations.browser import browser_isenabled, browsersite_isenabled, browsergoogle_isenabled, browseryoutube_isenabled, browsergmail_isenabled, browseramazon_isenabled, BrowserSite, BrowserGoogle, BrowserYoutube, BrowserGmail, BrowserAmazon
 from integrations.discord import discord_isenabled, discordtext_isenabled, DiscordText
 from integrations.facebook import facebook_isenabled, facebooktext_isenabled, FacebookText
 from integrations.lamathome import lamathome_isenabled, lamathometerminate_isenabled, terminate
@@ -28,27 +29,32 @@ def LLMParse(user_prompt, transcript=None, temperature=0.1, top_p=1):
 
             # Integration List:
 
+            ### Browser Commands:
+            Site: Browser site [site to open/search in]
+            Example: Browser site rabbit.tech (Opens rabbit.tech on local computer {ONLY OUTPUT LINK, NO EXTRA TEXT})
+
+            Google: Browser Google [search query]
+            Example: Browser Google What is the meaning of life? (Searches Google on local computer)
+
+            YouTube: Browser YouTube [search query]
+            Example: Browser YouTube How to bake a cake (Searches youtube on local computer)
+
+            Gmail: Browser Gmail [search query]
+            Example: Browser Gmail AI (Searches gmail on local computer)
+
+            Amazon: Browser Amazon [search query]
+            Example: Browser Amazon Men's socks (Searches amazon on local computer)
+
             ### Computer Commands:
-            Google: Computer Google [search query]
-            Example: Computer Google What is the meaning of life? (Searches Google on local computer)
-
-            YouTube: Computer YouTube [search query]
-            Example: Computer YouTube How to bake a cake (Searches youtube on local computer)
-
-            Gmail: Computer Gmail [search query]
-            Example: Computer Gmail AI (Searches gmail on local computer)
-
-            Amazon: Computer Amazon [search query]
-            Example: Computer Amazon Men's socks (Searches amazon on local computer)
-
             Volume: Computer Volume [1-100|up|down|mute|unmute]
             Example: Computer Volume 30 (Sets volume to 30% on local computer
 
             Run: Computer run [search term]
             Example: Computer Run command prompt (Opens command prompt on local computer)
 
-            Site: Computer site [search term]
-            Example: Computer Site ebay (Opens ebay.com on local computer {ONLY OUTPUT LINK, NO EXTRA TEXT})
+            Media: Computer media [next|back, play|pause]
+            Example: Computer media back (uses windows media player "skip" function, either next or back)
+            Example: Computer media play (uses windows media player "play/pause" function)
 
             ### Messaging Commands:
             Telegram: Telegram [Name] [Message]
@@ -86,8 +92,8 @@ def LLMParse(user_prompt, transcript=None, temperature=0.1, top_p=1):
             Missing platform specification: Message John → Respond with x.
             Non-integrated service: Send a message to Justin on WhatsApp saying this is a test. → Respond with x.
             Correct command: Telegram Jason What's on the shopping list? → Telegram Jason What's on the shopping list?
-            Master Rule List:
 
+            Master Rule List:
             For any query or request not related to the integration list, respond with x.
             For commands missing any part of the required structure, respond with x.
             For ambiguous or unclear recipients, respond with x.
@@ -97,8 +103,8 @@ def LLMParse(user_prompt, transcript=None, temperature=0.1, top_p=1):
             For requests to open a specific site, if you are aware of the site's existence, open it.
             For multiple commands, choose the most important one and respond with the formatted command. Ignore the rest.
             Your output should be the command only, with no quotations. Our server may break if the existence of quotation marks is detected.
-            Additional Examples:
 
+            Additional Examples:
             Telegram Jason → Respond with x. (Missing Message variable)
             Quit out of Lam at home → lamathome terminate
             Send a message on telegram saying Hi! → Respond with x. (Missing Recipient variable)
@@ -116,13 +122,18 @@ def LLMParse(user_prompt, transcript=None, temperature=0.1, top_p=1):
             yo whaddup can you send a message to jane on uhh. face book? asking if she's doing ok recently? → Respond with Facebook Jane Are you doing ok recently?.
             Send a Facebook text to Jane asking if she's okay. → Facebook Jane Are you okay?
             Text Jane on Facebook to see if she's available. Also send another text to Jake, asking when he'll be in town. → Facebook Jane Are you available?. (Two prompts, pick the most important one to send)
-            Search for emails from boss in my Gmail. Also, open another search for amazon, search for cool sunglasses. → Computer Gmail boss (Two prompts, pick the most important one to send)
-            Check Gmail for messages from Alice in the last week. → Computer Gmail Alice [Whatever the format in gmail is to search in the last week]
-            Find a YouTube video on my computer about cake baking. → Computer YouTube How to bake a cake
-            Computer YouTube search for 'funny cat videos.' → Computer YouTube funny cat videos
-            Look up 'How to tie a tie' on YouTube using my computer. → Computer YouTube How to tie a tie
-            Amazon search for hiking boots on my computer. → Computer Amazon hiking boots 
-            Computer, look up 'wireless headphones' on Amazon. → Computer Amazon wireless headphones
+            Search for emails from boss in my Gmail. Also, open another search for amazon, search for cool sunglasses. → Browser Gmail boss (Two prompts, pick the most important one to send)
+            Check Gmail for messages from Alice in the last week. → Browser Gmail Alice [Whatever the format in gmail is to search in the last week]
+            Find a YouTube video on my computer about cake baking. → Browser YouTube How to bake a cake
+            Browser YouTube search for 'funny cat videos.' → Browser YouTube funny cat videos
+            Look up 'How to tie a tie' on YouTube using my computer. → Browser YouTube How to tie a tie
+            Amazon search for hiking boots on my computer. → Browser Amazon hiking boots 
+            Can you skip on my computer? → Computer media next
+            Can you skip back one on my computer? → Computer media back
+            Can you skip back twice on my computer? → Computer media back&&Computer skip back
+            Can you pause on my computer? → Computer media pause
+            Can you play on my computer? → Computer media play
+            Browser, look up 'wireless headphones' on Amazon. → Browser Amazon wireless headphones
             Turn off Lamb at home. → lamathome terminate
             Set computer sound to 50%. → Computer Volume 50
             Volume up on my computer. → Computer Volume up
@@ -130,7 +141,7 @@ def LLMParse(user_prompt, transcript=None, temperature=0.1, top_p=1):
             Open command prompt on my computer. → Computer run command prompt
             Run Notion on computer. → Computer run Notion
             Launch calculator on my computer. → Computer run calculator
-            Look up 'nike shoes' on ebay on my computer. → Computer site https://www.ebay.com/sch/i.html?_nkw=nike%20shoe (Use your best judgement. Not all search links will be formatted like this.)
+            Look up 'nike shoes' on ebay on my computer. → Browser site [ebay search link here] (Use your best judgement. Not all search links will be formatted the same.)
             What's the nearest star to Earth? Also, text Justin on telegram asking what's for dinner. → Respond with Telegram Justin What's for dinner? (Two prompts, pick the most important one to send. in this case, only one was a command.)
             """
         },
@@ -211,28 +222,8 @@ def CombinedParse(context, text):
             log_disabled_integration("Computer")
             return
 
-        if recipient in ["google", "youtube", "gmail", "amazon", "volume", "run", "site"]:
-            if recipient == "google":
-                if computergoogle_isenabled:
-                    ComputerGoogle(text)
-                else:
-                    log_disabled_integration("ComputerGoogle")
-            elif recipient == "youtube":
-                if computeryoutube_isenabled:
-                    ComputerYoutube(text)
-                else:
-                    log_disabled_integration("ComputerYoutube")
-            elif recipient == "gmail":
-                if computergmail_isenabled:
-                    ComputerGmail(text)
-                else:
-                    log_disabled_integration("ComputerGmail")
-            elif recipient == "amazon":
-                if computeramazon_isenabled:
-                    ComputerAmazon(text)
-                else:
-                    log_disabled_integration("ComputerAmazon")
-            elif recipient == "volume":
+        if recipient in ["volume", "run", "site"]:
+            if recipient == "volume":
                 if computervolume_isenabled:
                     ComputerVolume(text)
                 else:
@@ -240,13 +231,53 @@ def CombinedParse(context, text):
             elif recipient == "run":
                 if computerrun_isenabled:
                     ComputerRun(text)
-            elif recipient == "site":
-                if computersite_isenabled:
-                    ComputerSite(text)
                 else:
-                    log_disabled_integration("ComputerRun")
+                    log_disabled_integration("ComputerSite")
+            elif recipient == "media":
+                if computermedia_isenabled:
+                    ComputerMedia(text)
+                else:
+                    log_disabled_integration("ComputerMedia")
+
         else:
             logging.error("Unknown Computer command or the integration is not enabled.")
+
+    elif integration == "browser":
+        if not browser_isenabled:
+            log_disabled_integration("Browser")
+            return
+        
+        if recipient in ["site", "google", "youtube", "gmail", "amazon"]:
+            search = message.strip()
+
+            if recipient == "site":
+                if browsersite_isenabled:
+                    BrowserSite(message)
+                else:
+                    log_disabled_integration("BrowserSite")
+            elif recipient == "google":
+                if browsergoogle_isenabled:
+                    BrowserGoogle(message)
+                else:
+                    log_disabled_integration("BrowserGoogle")
+            elif recipient == "youtube":
+                if browseryoutube_isenabled:
+                    BrowserYoutube(message)
+                else:
+                    log_disabled_integration("BrowserYoutube")
+            elif recipient == "gmail":
+                if browsergmail_isenabled:
+                    BrowserGmail(message)
+                else:
+                    log_disabled_integration("BrowserGmail")
+            elif recipient == "amazon":
+                if browseramazon_isenabled:
+                    BrowserAmazon(message)
+                else:
+                    log_disabled_integration("BrowserAmazon")
+        else:
+            logging.error("Unknown Browser command or the integration is not enabled.")
+
     elif integration == "lamathome":
         if not lamathome_isenabled:
             log_disabled_integration("LAMatHome")

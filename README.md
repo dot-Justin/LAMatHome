@@ -3,14 +3,21 @@
 </p>
 
 <div align="center">
-  <a href="https://discord.gg/6aU9fjyk2g">
-  <img src="https://dcbadge.limes.pink/api/server/6aU9fjyk2g?theme=default-inverted" alt="Discord Badge" style="border-radius: 5px; width: auto; height: 20px;"></a>
-  <img src="https://img.shields.io/github/commit-activity/m/dot-justin/LAMatHome" alt="Commit Activity" style="border-radius: 5px;">
-  <img src="https://img.shields.io/github/last-commit/dot-justin/LAMatHome" alt="Last Commit" style="border-radius: 5px;">
-  <img src="https://img.shields.io/github/issues/dot-justin/LAMatHome" alt="Issues" style="border-radius: 5px;">
+  <a href="https://discord.gg/6aU9fjyk2g" style="text-decoration: none;">
+    <img src="https://dcbadge.limes.pink/api/server/6aU9fjyk2g?style=flat&theme=default-inverted" alt="Discord Badge" width="auto" height="20px">
+  </a>
+  <a href="https://github.com/dot-justin/LAMatHome/commits/main" style="text-decoration: none;">
+    <img src="https://img.shields.io/github/commit-activity/m/dot-justin/LAMatHome" alt="Commit Activity">
+  </a>
+  <a href="https://github.com/dot-justin/LAMatHome/commits/main" style="text-decoration: none;">
+    <img src="https://img.shields.io/github/last-commit/dot-justin/LAMatHome" alt="Last Commit">
+  </a>
+  <a href="https://github.com/dot-justin/LAMatHome/issues" style="text-decoration: none;">
+    <img src="https://img.shields.io/github/issues/dot-justin/LAMatHome" alt="Issues">
+  </a>
 </div>
 
-<p align="center" style="padding-top: 8px;">
+<p align="center">
   <i>LAMatHome helps you expand the functionality of your rabbit r1.</i>
 </p>
 
@@ -39,7 +46,7 @@ By doing this, we avoid the user having to learn every command for every integra
 
 Then, `llm_parse.py` takes your neatly formatted command, and executes it based on which integration is called, and the parameters.
 
-### Integrations
+## Integrations
 Below is a list of our current integrations. This list is kept up-to-date.
 
 ||Name|Category|Description|Example prompt|

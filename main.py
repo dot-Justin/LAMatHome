@@ -4,7 +4,7 @@ import logging
 import coloredlogs
 from datetime import datetime, timezone
 from collections import deque
-from utils import config, ui, llm_parse, rabbithole, splashscreen
+from utils import config, ui, llm_parse, rabbithole, splashscreen, get_env
 from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
 
 
@@ -54,10 +54,12 @@ def main():
             browser = p.firefox.launch(headless=False)
             context = browser.new_context(storage_state=state_file)  # Use state to stay logged in
 
-            # fetch rabbit hole user
-            profile = rabbithole.fetch_user_profile()
-            user = profile.get('name')
-            assistant = profile.get('assistantName')
+            user, assistant = None, None
+            if get_env.RH_ACCESS_TOKEN:
+                # fetch rabbit hole user profile
+                profile = rabbithole.fetch_user_profile()
+                user = profile.get('name')
+                assistant = profile.get('assistantName')
             
             if config.config["mode"] == "rabbit":
                 currentTimeIso = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
@@ -70,7 +72,7 @@ def main():
                 logging.info("Entering interactive mode...")
                 while True:
                     try:
-                        user_input = input(f"{user}@LAMatHome> ")
+                        user_input = input(f"{user}@LAMatHome> " if user else "LAMatHome> ")
                         process_utterance(user_input, transcript, context)
                     except PlaywrightTimeoutError:
                         logging.error("Playwright timed out while waiting for response.")

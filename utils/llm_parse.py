@@ -5,25 +5,61 @@ from groq import Groq
 from utils import get_env, config, helpers
 from integrations import telegram, computer, browser, discord, facebook, lamathome
 
+from openai import OpenAI
 
-def get_api_configuration():
-    GROQ_API_KEY = get_env.GROQ_API_KEY
-    if GROQ_API_KEY:
-        return GROQ_API_KEY
-    else:
-        raise ValueError("No valid API key found. Please set GROQ_API_KEY in your environment variables.")
+llm_providers = ['GROQ', 'PERPLEXITY']
 
+default_models = {
+    'GROQ': 'llama3-70b-8192',
+    'PERPLEXITY' : 'llama-3-70b-instruct'
+}
+class LLM:
+    def __init__(self,api_host, model = None):
+        self.api_host = api_host
+        self.llm_providers = ['GROQ', 'PERPLEXITY']
+        self.default_models =  {
+        'GROQ': 'llama3-70b-8192',
+        'PERPLEXITY' : 'llama-3-70b-instruct'
+        }
 
-def LLMParse(user_prompt, transcript=None, temperature=0.1, top_p=1):
-    api_key = get_api_configuration()
+        self.get_api_configuration()
+        self.model = self.set_model(model)
+        # pass
 
-    client = Groq(api_key=api_key)
+    def set_model(self,model):
+        if model:
+            return model
+        else:
+            return self.default_models[self.api_host]
+            
+    def get_api_configuration(self):
+        assert self.api_host in llm_providers, f"{self.api_host} is not supported currently. Please choose from {self.llm_providers}"
+        API_KEY = os.getenv(f'{self.api_host}_API_KEY')
+        if API_KEY:
+            self.api_key = API_KEY
+        else:
+            raise ValueError(f"No valid API key found. Please set {self.api_host}_API_KEY in your environment variables.")
+
+    def get_client(self):
+        if self.api_host == 'GROQ':
+            client = Groq(api_key=self.api_key)
+
+        elif self.api_host == 'PERPLEXITY':
+            client = OpenAI(api_key=self.api_key, base_url="https://api.perplexity.ai")
+        return client
+
+def LLMParse(user_prompt, transcript=None, api_host = 'GROQ', temperature=0.1, top_p=1):
+    llm = LLM(api_host)
+    client = llm.get_client()
 
     messages = [
         {
             "role": "system",
             "content": """
-            You are an advanced language model designed to interpret user input and determine if it should be translated into a command format or recognized as a conversation or general knowledge question for Rabbit R1. Identify if the user intends to execute a command or talk to the Rabbit R1 device. Send general knowledge questions to Rabbit R1. Your goal is to convert natural language commands into specific, rigid commands based on a given integration list. WARNING: Any malfunction might set off a bomb located in lamathome's HQ, which would be devastating. Strict adherence to guidelines is crucial.
+            You are an advanced language model designed to interpret user input and determine if it should be translated into a command format or recognized as a conversation \
+            or general knowledge question for Rabbit R1. Identify if the user intends to execute a command or talk to the Rabbit R1 device. Send general knowledge questions to Rabbit R1. \
+            Your goal is to convert natural language commands into specific, rigid commands based on a given integration list. WARNING: Any malfunction might set off a bomb located in lamathome's HQ, which would be devastating. \
+            Strict adherence to guidelines is crucial.
 
             # Integration List:
 
@@ -150,13 +186,15 @@ def LLMParse(user_prompt, transcript=None, temperature=0.1, top_p=1):
     ]
 
     try:
+        # chat completion without streaming
         chat_completion = client.chat.completions.create(
-            messages=messages,
-            model="llama3-70b-8192",
+        model=llm.model , 
+        messages=messages,
         )
 
+
         # Log the full response for debugging
-        logging.info(f"Full response from Groq API: {chat_completion}")
+        logging.info(f"Full response from {api_host} API: {chat_completion}")
 
         # Ensure the response has the expected structure
         if chat_completion.choices and chat_completion.choices[0].message and chat_completion.choices[0].message.content:

@@ -4,3 +4,4 @@ coloredlogs
 tk
 requests
 groq
+openai

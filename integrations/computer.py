@@ -5,13 +5,12 @@ import logging
 import subprocess
 import platform
 from utils.helpers import log_disabled_integration
+from utils.config import config
 
 ############################
 #      ComputerVolume      #
 ############################
 
-vol_up_step_value = 4
-vol_down_step_value = 4
 
 def is_mac():
     return platform.system() == "Darwin"
@@ -66,20 +65,20 @@ def ComputerVolume(title):
 
         if volume_word == "up":
             try:
-                for _ in range(vol_up_step_value):
+                for _ in range(config['vol_up_step_value']):
                     ctypes.windll.user32.keybd_event(0xAF, 0, 0, 0)
                     ctypes.windll.user32.keybd_event(0xAF, 0, 2, 0)
-                logging.info(f"Increased volume by {vol_up_step_value} steps")
+                logging.info(f"Increased volume by {config['vol_up_step_value']} steps")
             except Exception as e:
                 logging.error(f"Failed to increase volume: {e}")
             return
 
         if volume_word == "down":
             try:
-                for _ in range(vol_down_step_value):
+                for _ in range(config['vol_down_step_value']):
                     ctypes.windll.user32.keybd_event(0xAE, 0, 0, 0)
                     ctypes.windll.user32.keybd_event(0xAE, 0, 2, 0)
-                logging.info(f"Decreased volume by {vol_down_step_value} steps")
+                logging.info(f"Decreased volume by {config['vol_down_step_value']} steps")
             except Exception as e:
                 logging.error(f"Failed to decrease volume: {e}")
             return

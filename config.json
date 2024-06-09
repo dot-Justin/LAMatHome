@@ -23,5 +23,7 @@
 	"lamathome_isenabled": true,
 	"lamathometerminate_isenabled": true,
 	"telegram_isenabled": true,
-	"telegramtext_isenabled": true
+	"telegramtext_isenabled": true,
+	"vol_up_step_value": 4,
+	"vol_down_step_value": 4
 }

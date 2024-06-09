@@ -121,10 +121,12 @@ def ComputerRun(title):
         return
 
     command = " ".join(words[2:])
+    print('command is:', command)
 
     if is_mac():
         try:
-            subprocess.run(["osascript", "-e", f'tell application "System Events" to keystroke "{command}"'])
+            subprocess.run(['open', '-a', {command}])
+            subprocess.run(["osascript", "-e", 'tell application "System Events" to keystroke return'])
             logging.info(f"Executed command: {command}")
         except Exception as e:
             logging.error(f"Failed to execute command: {e}")

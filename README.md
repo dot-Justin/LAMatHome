@@ -2,8 +2,16 @@
   <img src="assets/LAH_splash.gif" alt="LAMatHome" width="800"/>
 </p>
 
-<p align="center">
-  <i>LAMatHome helps you expand the functionality of your rabbit r1. Here's how it works: </i>
+<div align="center">
+  <a href="https://discord.gg/6aU9fjyk2g">
+  <img src="https://dcbadge.limes.pink/api/server/6aU9fjyk2g?theme=default-inverted" alt="Discord Badge" style="border-radius: 5px; width: auto; height: 20px;"></a>
+  <img src="https://img.shields.io/github/commit-activity/m/dot-justin/LAMatHome" alt="Commit Activity" style="border-radius: 5px;">
+  <img src="https://img.shields.io/github/last-commit/dot-justin/LAMatHome" alt="Last Commit" style="border-radius: 5px;">
+  <img src="https://img.shields.io/github/issues/dot-justin/LAMatHome" alt="Issues" style="border-radius: 5px;">
+</div>
+
+<p align="center" style="padding-top: 8px;">
+  <i>LAMatHome helps you expand the functionality of your rabbit r1.</i>
 </p>
 
 ## Overview:
@@ -127,12 +135,6 @@ Run `main.py` from the root directory
 
 This will start the LAMatHome program, and (as long as your token is valid) you can start giving prompts to r1.
 
-### Telegram integration:
-To get Telegram running and sending texts on your behalf, some setup is required. Follow this guide:
-1. Give LAMatHome any Telegram command. This can be a test, but be aware that the text will be sent after you log in.
-2. A Firefox Nightly window (Playwright instance) will open up and request your sign-in.
-3. Sign in, and watch the text go through. After this, your session is saved and you won't need to log back in for a long while.
-
 
 ### Stopping LAMatHome
 To stop LAMatHome, you have two options.
@@ -143,16 +145,36 @@ To stop LAMatHome, you have two options.
    - Find the command prompt where it's currently running from.
    - Press `Ctrl + C` to exit the program. You may see some errors, this is expected and will not mess up your installation.
 
-### Disabling integrations
-If you don't want to use specific integration, no worries!
-1. Open the `integrations/` folder in the your LAMatHome directory.
-2. Open the `.py` file for the integration you'd like to disable (Use your favorite IDE. A good free one is [notepad++](https://notepad-plus-plus.org/downloads/))
-3. Hit `Ctrl + F`, and search for `_isenabled`.
-4. The first instance of this in each file will disable the integration altogether. (e.g. `computer_isenabled=False`)
-5. If you want more granular control (i.e. disabling google searches but allowing everything else), you would find the line that says `(integrationname)(functionname)_isenabled`. For example, `computergoogle_isenabled`.
-   - `=True` for enabled, `=False` for disabled.
+## Configuration
+Open the `config.json` file in the root directory of your project. (Use your favorite IDE. A free, lightweight one is [notepad++](https://notepad-plus-plus.org/downloads/))
 
-We plan to make this easier to adjust in the future.
+### General config options:
+`mode`:
+- The only options here are `rabbit` and `cli`. `rabbit` mode will listen to the rabbithole api for journal entries, while `cli` mode will turn LAMatHome into a dumb [OpenInterpreter](https://github.com/OpenInterpreter/open-interpreter).
+
+`rabbithole_api_max_retry`:
+- This determines how many times LAMatHome will try to connect after failure.
+
+`rabbithole_api_sleep_time`:
+- This determines how many seconds LAMatHome will wait between refreshes.
+
+`rolling_transcript_size`:
+- This determines how many of your past prompts will get passed to llm_parse. The higher the number, the more "memory" the LLM has.
+
+### Disabling integrations:
+If you don't want to use specific integration, no worries!
+Find the integration you want to disable. Set each value to `false`, and they will no longer be activated by llm_parse.
+
+Examples:
+- `"browsergoogle_isenabled": false,` The `Google` function of the `Browser` integration is **disabled**.
+- `"computervolume_isenabled": true,` The `Volume` function of the `Computer` integration is **enabled**.
+- `"browser_isenabled": false,` = All of the browser functions are **disabled**, even if the child functions are set to `true`.
+
+### Telegram integration:
+To get Telegram running and sending texts on your behalf, some setup is required. Follow this guide:
+1. Give LAMatHome any Telegram command. This can be a test, but be aware that the text will be sent after you log in.
+2. A Firefox Nightly window (Playwright instance) will open up and request your sign-in.
+3. Sign in, and watch the text go through. After this, your session is saved and you won't need to log back in for a long while.
 
 ## Other information:
 ### Errors you may run into:

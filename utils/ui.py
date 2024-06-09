@@ -10,14 +10,18 @@ def create_env_file():
         dc_email = dc_email_entry.get()
         dc_pass = dc_pass_entry.get()
         groq_api_key = groq_api_key_entry.get()
+        icloud_user = icloud_user_entry.get()
+        icloud_pass = icloud_pass_entry.get()
 
         with open(".env", "w") as env_file:
             env_file.write(f"RH_ACCESS_TOKEN='{rh_access_token}'\n")
             env_file.write(f"FB_EMAIL='{fb_email}'\n")
-            env_file.write(f"FB_PASS='{fb_pass}'\n")  # Corrected key name
+            env_file.write(f"FB_PASS='{fb_pass}'\n")
             env_file.write(f"DC_EMAIL='{dc_email}'\n")
             env_file.write(f"DC_PASS='{dc_pass}'\n")
             env_file.write(f"GROQ_API_KEY='{groq_api_key}'\n")
+            env_file.write(f"ICLOUD_USER='{icloud_user}'\n")
+            env_file.write(f"ICLOUD_PASS='{icloud_pass}'\n")
         messagebox.showinfo("Success", ".env file created successfully!")
         root.destroy()  # Close the UI window
     except Exception as e:
@@ -25,13 +29,13 @@ def create_env_file():
 
 def create_ui():
     """Creates and runs the UI for credential input."""
-    global root, rh_access_token_entry, fb_email_entry, fb_pass_entry, dc_email_entry, dc_pass_entry, groq_api_key_entry
+    global root, rh_access_token_entry, fb_email_entry, fb_pass_entry, dc_email_entry, dc_pass_entry, groq_api_key_entry, icloud_user_entry, icloud_pass_entry
     root = tk.Tk()
     root.title("Enter Credentials")
     root.configure(bg='#1a1a1a')
 
     # Set window size and prevent fullscreen
-    root.geometry("500x400")
+    root.geometry("500x450")
     root.resizable(False, False)  # Disable resizing
 
     style = ttk.Style()
@@ -78,13 +82,27 @@ def create_ui():
     groq_api_key_entry = ttk.Entry(input_frame)
     groq_api_key_entry.grid(row=7, column=1, padx=5, pady=5, sticky='ew')
 
+    # iCloud Credentials
+    icloud_user_label = ttk.Label(input_frame, text="iCloud User:")
+    icloud_user_label.grid(row=8, column=0, padx=5, pady=5, sticky='w')
+    icloud_user_entry = ttk.Entry(input_frame)
+    icloud_user_entry.grid(row=8, column=1, padx=5, pady=5, sticky='ew')
+
+    icloud_pass_label = ttk.Label(input_frame, text="iCloud Password:")
+    icloud_pass_label.grid(row=9, column=0, padx=5, pady=5, sticky='w')
+    icloud_pass_entry = ttk.Entry(input_frame, show="*")
+    icloud_pass_entry.grid(row=9, column=1, padx=5, pady=5, sticky='ew')
+
     # Submit Button
     submit_button = ttk.Button(root, text="Submit", command=create_env_file)
     submit_button.pack(pady=10)
 
     # Make input fields expand to fill the width
-    for i in range(7):
+    for i in range(10):
         input_frame.grid_rowconfigure(i, weight=1)
     input_frame.grid_columnconfigure(1, weight=1)
 
     root.mainloop()  # Run the UI
+
+# Run the UI
+create_ui()

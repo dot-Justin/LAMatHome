@@ -8,13 +8,33 @@ from utils import config, ui, llm_parse, rabbithole, splashscreen
 from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
 
 
+def process_utterance(utterance, transcript, playwright_context):
+    logging.info(f"Prompt: {utterance}")
+
+    # split prompt into tasks
+    promptParsed = llm_parse.LLMParse(utterance, transcript)
+    tasks = promptParsed.split("&&")
+    
+    # iterate through tasks and execute each sequentially
+    for task in tasks:
+        logging.info(f"Task: {task}")
+        llm_parse.CombinedParse(playwright_context, task)
+
+        # Append the completed interaction to the transcript
+        chat = {
+            "user prompt": utterance,
+            "LLM response": promptParsed
+        }
+        transcript.append(chat)
+
+
 def main():
     try:
         # Check if env file exists, if not run ui.py to create it
         if not os.path.exists(config.config["env_file"]):
             ui.create_ui()
         print(splashscreen.colored_splash)
-        logging.info("LAMAtHome has started!")
+        logging.info("LAMatHome has started!")
 
         # create cache directory if it doesn't exist
         if not os.path.exists(config.config['cache_dir']):
@@ -33,28 +53,28 @@ def main():
             # Use firefox for full headless
             browser = p.firefox.launch(headless=False)
             context = browser.new_context(storage_state=state_file)  # Use state to stay logged in
+
+            # fetch rabbit hole user
+            profile = rabbithole.fetch_user_profile()
+            user = profile.get('name')
+            assistant = profile.get('assistantName')
             
-            currentTimeIso = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
-            for journal in rabbithole.journal_entries_generator(currentTimeIso):
-                # grab prompt from journal
-                prompt = journal['utterance']['prompt']
-                logging.info(f"Prompt: {prompt}")
+            if config.config["mode"] == "rabbit":
+                currentTimeIso = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
+                logging.info(f"Welcome {user}! LAMatHome is now listening for journals posted by {assistant}")
+                for journal in rabbithole.journal_entries_generator(currentTimeIso):
+                    prompt = journal['utterance']['prompt']
+                    process_utterance(prompt, transcript, context)
+            
+            elif config.config["mode"] == "cli":
+                logging.info("Entering interactive mode...")
+                while True:
+                    try:
+                        user_input = input(f"{user}@LAMatHome> ")
+                        process_utterance(user_input, transcript, context)
+                    except PlaywrightTimeoutError:
+                        logging.error("Playwright timed out while waiting for response.")
 
-                # split prompt into tasks
-                promptParsed = llm_parse.LLMParse(prompt, transcript)
-                tasks = promptParsed.split("&&")
-                
-                # iterate through tasks and execute each sequentially
-                for task in tasks:
-                    logging.info(f"Task: {task}")
-                    llm_parse.CombinedParse(context, task)
-
-                    # Append the completed interaction to the transcript
-                    chat = {
-                        "user prompt": prompt,
-                        "LLM response": promptParsed
-                    }
-                    transcript.append(chat)
     except KeyboardInterrupt:
         logging.info("Program terminated by user.")
     finally:

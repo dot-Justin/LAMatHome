@@ -1,4 +1,5 @@
 {
+	"mode": "rabbit",
 	"env_file": ".env",
 	"cache_dir": "cache",
 	"state_file": "state.json",

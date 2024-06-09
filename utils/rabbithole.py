@@ -59,7 +59,7 @@ def fetch_user_profile():
     '''
     url = f"{BASE_URL}/fetchUserProfile"
     params = {"accessToken": RH_ACCESS_TOKEN}
-    return requests.post(url, headers=headers, params=params)
+    return requests.get(url, headers=headers, params=params)
 
 
 @handle_request_errors
@@ -69,7 +69,7 @@ def update_user_profile(profile=None):
     '''
     url = f"{BASE_URL}/updateUserProfile"
     body = {"accessToken": RH_ACCESS_TOKEN, "profile": profile}
-    return requests.post(url, headers=headers, json=body)
+    return requests.patch(url, headers=headers, json=body)
 
 
 @handle_request_errors

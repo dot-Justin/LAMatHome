@@ -80,7 +80,6 @@ def main():
     except KeyboardInterrupt:
         logging.info("Program terminated by user.")
     finally:
-        context.close()
         logging.info("Cleaning up and exiting...")
 
 

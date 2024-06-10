@@ -51,20 +51,19 @@ Below is a list of our current integrations. This list is kept up-to-date.
 
 ||Name|Category|Description|Example prompt|
 |-|-|-|-|-|
-||Site|Browser|Opens/Searches in any website|`Open the _____ website`|
-||[Google](https://google.com)|Browser|Searches Google|`Search google on my computer for ______`|
-||[YouTube](https://youtube.com)|Browser|Searches YouTube|`Open a YouTube search for ______ on my computer`|
-||[Gmail](https://gmail.com)|Browser|Searches Gmail|`Search my emails on my computer for ______`|
-||[Amazon](https://amazon.com)|Browser|Searches Amazon|`Search amazon on computer: ______`|
+||Site|Browser|Opens/Searches in any website.|`Open the _____ website`|
+||[Google](https://google.com)|Browser|Searches Google.|`Search google on my computer for ______`|
+||[YouTube](https://youtube.com)|Browser|Searches YouTube.|`Open a YouTube search for ______ on my computer`|
+||[Gmail](https://gmail.com)|Browser|Searches Gmail.|`Search my emails on my computer for ______`|
+||[Amazon](https://amazon.com)|Browser|Searches Amazon.|`Search amazon on computer: ______`|
 |❕|Run|Local Actions|Presses Windows key, searches for an app, and runs.|`Open up the chat app for gamers on my computer`|
 |❕|Volume|Local Actions|Sets volume, turns up/down, and mutes/unmutes.|`Change the volume on my pc to 50`|
-||Media|Local Actions|Skips media next/back, pause/unpause|`Pause on my pc`, `Skip twice backwards on my computer`|
+||Media|Local Actions|Skips media next/back, pause/unpause.|`Pause on my pc`, `Skip twice backwards on my computer`|
+||[Google Home](https://home.google.com)|Local Actions|Activates Google Home automations.|`Turn on my desk lamp`, `Use google home to turn on my lamp, but I forgot what it's called`|
 ||LAMatHome|Local Actions|Only integration currently is "terminate", which closes LAH.|`That's enough from you. Close LAM at home.`|
-|⚠️|[Discord](https://discord.com)|Messaging|Sends a message on Discord to a specified person/channel|`Text poke on discord asking when he's going to be back online. Wait, no ask him on telegram. Actually no, discord is good.`|
-|⚠️|[FB Messenger](https://messenger.com)|Messaging|Sends a message on FB Messenger to a specified person|`Ask Justin what he thinks of my new sunglasses. Oh, send that on facebook.`|
-|⚠️|[Telegram](https://web.telegram.org/)|Messaging|Sends a message on Telegram to a specified person|`Message Kevin on telegram asking him when he's gonna PR his new feature`|
-
-
+|⚠️|[Discord](https://discord.com)|Messaging|Sends a message on Discord to a specified person/channel.|`Text poke on discord asking when he's going to be back online. Wait, no ask him on telegram. Actually no, discord is good.`|
+|⚠️|[FB Messenger](https://messenger.com)|Messaging|Sends a message on FB Messenger to a specified person.|`Ask Justin what he thinks of my new sunglasses. Oh, send that on facebook.`|
+|⚠️|[Telegram](https://web.telegram.org/)|Messaging|Sends a message on Telegram to a specified person.|`Message Kevin on telegram asking him when he's gonna PR his new feature`|
 
 > [!NOTE]
 >
@@ -182,6 +181,15 @@ To get Telegram running and sending texts on your behalf, some setup is required
 1. Give LAMatHome any Telegram command. This can be a test, but be aware that the text will be sent after you log in.
 2. A Firefox Nightly window (Playwright instance) will open up and request your sign-in.
 3. Sign in, and watch the text go through. After this, your session is saved and you won't need to log back in for a long while.
+
+### Google Home integration:
+To allow LAMatHome to use your Google Home, you need to follow these steps:
+1. Add your `G_HOME_EMAIL` and `G_HOME_PASS` to your `.env` file.
+2. Create any Google Home automations that you want to run, using the Google Home mobile app.
+   - Example names that work well with LAMatHome: `Lamp on`, `Lamp off` (one for on and off respectively, because there is no toggle option.), `Goodnight`, etc. llm_parse needs to be able to link the user utterance to an automation.
+3. Add the verbatim Automation names to config.json, on the `googlehomeautomations` line. There are some examples there, just follow the pattern to add more.
+   - `"googlehomeautomations": ["Automation 1", "Automation 2", "Automation 3"],`
+4. You should be set! This list that you just configured will be passed to `/utils/llm_parse.py` and if determined to be run, will run! Ask r1/LAMatHome to "Turn on the lamp in my room" or "Turn off my tv".
 
 ## Other information:
 ### Errors you may run into:

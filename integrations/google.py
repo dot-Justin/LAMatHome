@@ -3,7 +3,7 @@ import logging
 from utils.get_env import G_HOME_EMAIL, G_HOME_PASS
 
 def GoogleHome(page, automation):
-    timeoutamt = 30000  # Set a longer timeout
+    timeoutamt = 30000
 
     """Opens Google home, logs in if necessary, and runs the automation."""
     session_file = "cache/state.json"
@@ -41,7 +41,6 @@ def GoogleHome(page, automation):
     if first_login:
         try:
             time.sleep(2)
-            # page.wait_for_selector("label:has-text(\"Don't show again\")", timeout=300)
             page.click("label:has-text(\"Don't show again\")")
             logging.info("Clicked 'Don't show again' checkbox")
         except Exception as e:
@@ -49,7 +48,6 @@ def GoogleHome(page, automation):
 
         try:
             time.sleep(2)
-            # page.wait_for_selector("text=OK", timeout=300)
             page.click("text=OK")
             logging.info("Clicked 'OK' after logging in")
         except Exception as e:
@@ -59,7 +57,6 @@ def GoogleHome(page, automation):
 
     logging.info("Waiting for the automation section to load")
 
-    # Wait for the main content to load by waiting for a specific element that indicates the page is ready
     try:
         page.wait_for_selector(f"//div[contains(@class, 'automation-name') and normalize-space(text())='{automation}']", timeout=timeoutamt)
         logging.info(f'Google Home "{automation}" section is visible')

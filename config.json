@@ -37,7 +37,7 @@
 
 	"google_isenabled": true,
 		"googlehome_isenabled": true,
-		"googlehomeautomations": ["turn off the tv", "turn on the tv"],
+		"googlehomeautomations": ["Automation 1", "Automation 2", "Automation 3"],
 			"googlehomeautomations_comment": "The above automations need to be verbatim what they are called on home.google.com.",
 
 	"lamathome_isenabled": true,

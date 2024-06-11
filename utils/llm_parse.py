@@ -1,9 +1,10 @@
-import os
 import re
 import logging
+import string
 from groq import Groq
 from utils import get_env, config, helpers
 from integrations import google, telegram, computer, browser, discord, facebook, lamathome
+from utils.contact_parse import get_contact_name
 
 
 def get_api_configuration():
@@ -128,6 +129,7 @@ def LLMParse(user_prompt, transcript=None, temperature=0.1, top_p=1):
             Send a discord text to John asking about the meeting. Also ask why he was late to the last one. → Discord John Did you get the meeting details? Also, why were you late to the previous one?
             yo whaddup can you send a message to jane on uhh. face book? asking if she's doing ok recently? → Respond with Facebook Jane Are you doing ok recently?
             Send a Facebook text to Jane asking if she's okay. → Facebook Jane Are you okay?
+            Snd a message to my wife on Facebook saying What's up? → Facebook My Wife What's Up?
             Text Jane on Facebook to see if she's available. Also send another text to Jake, asking when he'll be in town. → Facebook Jane Are you available?. (Two prompts, pick the most important one to send)
             What's the nearest star to Earth? Also, text Justin on telegram asking what's for dinner. → Respond with Telegram Justin What's for dinner? (Two prompts, pick the most important one to send. in this case, only one was a command.)
 
@@ -177,9 +179,6 @@ def LLMParse(user_prompt, transcript=None, temperature=0.1, top_p=1):
             model="llama3-70b-8192",
         )
 
-        # Log the full response for debugging
-        logging.info(f"Full response from Groq API: {chat_completion}")
-
         # Ensure the response has the expected structure
         if chat_completion.choices and chat_completion.choices[0].message and chat_completion.choices[0].message.content:
             response_text = chat_completion.choices[0].message.content.strip()
@@ -189,6 +188,7 @@ def LLMParse(user_prompt, transcript=None, temperature=0.1, top_p=1):
             match = re.search(r'`([^`]+)`', response_text)
             if match:
                 response_text = match.group(1)
+                logging.info('test:', response_text)
 
             return response_text
         else:
@@ -207,38 +207,68 @@ def CombinedParse(context, text):
         return
     
     integration = words[0].strip('.,!?:;"').lower()
-    recipient = words[1].strip('.,!?:;"').lower()
-    message = ' '.join(words[2:]).strip()
+    recipient = None
+    action = None
+
+    if integration in ['telegram', 'discord', 'facebook']:
+        # Check for the combination of the second and third words
+        combined_recipient = f"{words[1].strip(string.punctuation).lower()} {words[2].strip(string.punctuation).lower()}"
+        name = get_contact_name(integration, combined_recipient)
+        
+        if name:
+            recipient = name
+            message = ' '.join(words[3:]).strip()
+        else:
+            # Check for the second word only
+            single_recipient = words[1].strip(string.punctuation).lower()
+            name = get_contact_name(integration, single_recipient)
+            if name:
+                recipient = name
+                message = ' '.join(words[2:]).strip()
+            else:
+                action = single_recipient
+                message = ' '.join(words[2:]).strip()
+    else:
+        action = words[1].strip('.,!?:;"').lower()
+        message = ' '.join(words[2:]).strip()
+
+    if recipient:
+        logging.info(f"Recipient: {recipient}")
+        logging.info(f"Message: {message}")
+    else:
+        if action:
+            logging.info(f"Action: {action}")
+            logging.info(f"Message: {message}")
     
     if integration == "browser":
         if not config.config["browser_isenabled"]:
             helpers.log_disabled_integration("Browser")
             return
         
-        if recipient in ["site", "google", "youtube", "gmail", "amazon"]:
+        if action in ["site", "google", "youtube", "gmail", "amazon"]:
             search = message.strip()
 
-            if recipient == "site":
+            if action == "site":
                 if config.config["browsersite_isenabled"]:
                     browser.BrowserSite(search)
                 else:
                     helpers.log_disabled_integration("BrowserSite")
-            elif recipient == "google":
+            elif action == "google":
                 if config.config["browsergoogle_isenabled"]:
                     browser.BrowserGoogle(search)
                 else:
                     helpers.log_disabled_integration("BrowserGoogle")
-            elif recipient == "youtube":
+            elif action == "youtube":
                 if config.config["browseryoutube_isenabled"]:
                     browser.BrowserYoutube(search)
                 else:
                     helpers.log_disabled_integration("BrowserYoutube")
-            elif recipient == "gmail":
+            elif action == "gmail":
                 if config.config["browsergmail_isenabled"]:
                     browser.BrowserGmail(search)
                 else:
                     helpers.log_disabled_integration("BrowserGmail")
-            elif recipient == "amazon":
+            elif action == "amazon":
                 if config.config["browseramazon_isenabled"]:
                     browser.BrowserAmazon(search)
                 else:
@@ -251,26 +281,26 @@ def CombinedParse(context, text):
             helpers.log_disabled_integration("Computer")
             return
 
-        if recipient in ["volume", "run", "media", "power"]:
-            if recipient == "volume":
+        if action in ["volume", "run", "media", "power"]:
+            if action == "volume":
                 if config.config["computervolume_isenabled"]:
                     computer.ComputerVolume(text)
                     return
                 else:
                     helpers.log_disabled_integration("ComputerVolume")
-            elif recipient == "run":
+            elif action == "run":
                 if config.config["computerrun_isenabled"]:
                     computer.ComputerRun(text)
                     return
                 else:
                     helpers.log_disabled_integration("ComputerSite")
-            elif recipient == "media":
+            elif action == "media":
                 if config.config["computermedia_isenabled"]:
                     computer.ComputerMedia(text)
                     return
                 else:
                     helpers.log_disabled_integration("ComputerMedia")
-            elif recipient == "power":
+            elif action == "power":
                 if config.config["computerpower_isenabled"]:
                     computer.ComputerPower(text)
                     return
@@ -317,7 +347,7 @@ def CombinedParse(context, text):
             helpers.log_disabled_integration("LAMatHome")
             return
 
-        if recipient == "terminate":
+        if action == "terminate":
             if config.config["lamathometerminate_isenabled"]:
                 lamathome.terminate()
             else:

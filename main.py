@@ -4,7 +4,7 @@ import logging
 import coloredlogs
 from datetime import datetime, timezone
 from collections import deque
-from utils import config, ui, llm_parse, rabbithole, splashscreen, get_env
+from utils import config, ui, llm_parse, rabbithole, splashscreen, get_env 
 from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
 
 
@@ -49,6 +49,14 @@ def main():
             with open(state_file, 'w') as f:
                 json.dump({}, f)
 
+        contact_file_path = config.config["contacts_file"]
+    
+        if os.path.exists(contact_file_path):
+            with open(contact_file_path, "r") as contacts_file:
+                content = contacts_file.read()
+                if content == "contacts = {}":
+                    ui.create_ui()
+        
         # Initialize queue for storing rolling transcript
         transcript = deque(maxlen=config.config['rolling_transcript_size'])
 
@@ -87,12 +95,20 @@ def main():
 
 
 if __name__ == "__main__":
-    # configure logging and run LAMatHome
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+    
+    log_level_styles = {
+        'info': {'color': 'green'},
+        'debug': {'color': 'yellow'},
+        'error': {'color': 'red', 'bold': True},
+    }
+    
     coloredlogs.install(
         level='INFO', 
         fmt='%(asctime)s - %(levelname)s - %(message)s', 
         datefmt='%Y-%m-%d %H:%M:%S', 
-        field_styles={'asctime': {'color': 'white'}}
+        field_styles={'asctime': {'color': 'white'}},
+        level_styles=log_level_styles
     )
+    
     main()

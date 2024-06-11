@@ -23,6 +23,7 @@ def login_discord(page):
 
 def DiscordText(page, recipient, message):
     if not (page, recipient, message):
+        logging.error(f'Missing one of the required parameters to complete the task ({page}, {recipient}, or {message})')
         pass
     else:
         """Sends a message to a specific recipient on Discord."""

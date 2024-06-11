@@ -3,32 +3,33 @@ import json
 import logging
 import coloredlogs
 from datetime import datetime, timezone
-from collections import deque
-from utils import config, ui, llm_parse, rabbithole, splashscreen, get_env
+from utils import config, ui, llm_parse, rabbithole, journal, splashscreen, get_env
 from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
 
 
-def process_utterance(utterance, transcript, playwright_context):
+def process_utterance(journal_entry, journal: journal.Journal, playwright_context):
+    if isinstance(journal_entry, str):
+        utterance = journal_entry
+    else: 
+        utterance = journal_entry['utterance']['prompt']
     logging.info(f"Prompt: {utterance}")
 
-    # split prompt into tasks
-    promptParsed = llm_parse.LLMParse(utterance, transcript)
-    tasks = promptParsed.split("&&")
-    
-    # iterate through tasks and execute each sequentially
-    for task in tasks:
-        if task != "x":
-            logging.info(f"Task: {task}")
-            llm_parse.CombinedParse(playwright_context, task)
+    try:
+        # split prompt into tasks
+        promptParsed = llm_parse.LLMParse(utterance, journal.get_interactions())
+        tasks = promptParsed.split("&&")
+        
+        # iterate through tasks and execute each sequentially
+        for task in tasks:
+            if task != "x":
+                logging.info(f"Task: {task}")
+                llm_parse.CombinedParse(playwright_context, task)
 
-            # Append the completed interaction to the transcript
-            chat = {
-                "user prompt": utterance,
-                "LLM response": promptParsed
-            }
-            transcript.append(chat)
-        else:
-            logging.error("LLMParse returned x. (Not determined to be a LAMatHome command, or insuffecient parameters.)")
+        # Append the completed interaction to the journal
+        journal.add_entry(journal_entry, llm_response=promptParsed)
+
+    except PlaywrightTimeoutError:
+        logging.error("Playwright timed out while waiting for response.")
 
 
 def main():
@@ -49,8 +50,8 @@ def main():
             with open(state_file, 'w') as f:
                 json.dump({}, f)
 
-        # Initialize queue for storing rolling transcript
-        transcript = deque(maxlen=config.config['rolling_transcript_size'])
+        # Initialize journal for storing rolling transcript
+        userJournal = journal.Journal(max_entries=config.config['rolling_transcript_size'])
 
         with sync_playwright() as p:
             # Use firefox for full headless
@@ -67,23 +68,23 @@ def main():
             if config.config["mode"] == "rabbit":
                 currentTimeIso = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
                 logging.info(f"Welcome {user}! LAMatHome is now listening for journals posted by {assistant}")
-                for journal in rabbithole.journal_entries_generator(currentTimeIso):
-                    prompt = journal['utterance']['prompt']
-                    process_utterance(prompt, transcript, context)
+                for journal_entry in rabbithole.journal_entries_generator(currentTimeIso):
+                    process_utterance(journal_entry, userJournal, context)
             
             elif config.config["mode"] == "cli":
                 logging.info("Entering interactive mode...")
                 while True:
-                    try:
-                        user_input = input(f"{user}@LAMatHome> " if user else "LAMatHome> ")
-                        process_utterance(user_input, transcript, context)
-                    except PlaywrightTimeoutError:
-                        logging.error("Playwright timed out while waiting for response.")
+                    user_input = input(f"{user}@LAMatHome> " if user else "LAMatHome> ")
+                    process_utterance(user_input, userJournal, context)
+
+            else:
+                logging.error("Invalid mode specified in config.json")
 
     except KeyboardInterrupt:
-        logging.info("Program terminated by user.")
+        print("\n")
+        logging.info("Program terminated by user")
     finally:
-        logging.info("Cleaning up and exiting...")
+        logging.info("exiting...")
 
 
 if __name__ == "__main__":

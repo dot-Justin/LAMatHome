@@ -59,6 +59,7 @@ Below is a list of our current integrations. This list is kept up-to-date.
 |❕|Run|Local Actions|Presses Windows key, searches for an app, and runs.|`Open up the chat app for gamers on my computer`|
 |❕|Volume|Local Actions|Sets volume, turns up/down, and mutes/unmutes.|`Change the volume on my pc to 50`|
 ||Media|Local Actions|Skips media next/back, pause/unpause.|`Pause on my pc`, `Skip twice backwards on my computer`|
+|❕|Power|Local Actions|Power options (Lock/Sleep/Restart/Shutdown)|`Shutdown my PC`, `Please lock my computer`|
 ||[Google Home](https://home.google.com)|Local Actions|Activates Google Home automations.|`Turn on my desk lamp`, `Use google home to turn on my lamp, but I forgot what it's called`|
 ||LAMatHome|Local Actions|Only integration currently is "terminate", which closes LAH.|`That's enough from you. Close LAM at home.`|
 |⚠️|[Discord](https://discord.com)|Messaging|Sends a message on Discord to a specified person/channel.|`Text poke on discord asking when he's going to be back online. Wait, no ask him on telegram. Actually no, discord is good.`|
@@ -67,7 +68,7 @@ Below is a list of our current integrations. This list is kept up-to-date.
 
 > [!NOTE]
 >
-> *Integrations marked with a* ❕ *need to be saved as a note to work. r1 will interpret these as commands to itself, and not save the query to the rabbithole. This is a result of r1 update 20240603.15/0.8.99(134D8DE) that enabled voice settings.*
+> *Integrations marked with a* ❕ *may need to be saved as a note to work. r1 could interpret these as commands to itself, and not save the query to the rabbithole. This is a result of r1 update 20240603.15/0.8.99(134D8DE) that enabled voice settings.*
 > 
 > *Integrations marked with a ⚠️ are experimental and may send to the incorrect person/channel based on the way the user utterance is transcribed. This is a limitation of the r1, not LLM Parsing.*
 

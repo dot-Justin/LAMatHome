@@ -43,6 +43,8 @@ def FacebookText(page, recipient, message):
     except Exception as e:
         logging.error(f"Error closing second pop-up: {e}")
 
+    page.goto("https://www.messenger.com/t")
+    page.wait_for_timeout(500)
     # Search for the recipient and open the conversation
     search_box = page.locator('input[aria-label="Search Messenger"]')
     search_box.click()

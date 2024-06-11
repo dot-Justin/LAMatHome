@@ -3,8 +3,8 @@ import time
 import logging
 import requests
 from datetime import datetime, timezone
-from utils.config import config
-from utils.get_env import RH_ACCESS_TOKEN
+from .config import config
+from .get_env import RH_ACCESS_TOKEN
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -39,13 +39,11 @@ def handle_request_errors(func):
             error_count = 0
             return response.json()
         except requests.exceptions.HTTPError as e:
-            if e.response.status_code == 500:
-                error_count += 1
-                logging.error(f"Server error: {e} when calling {func.__name__}")
-                if error_count == config["rabbithole_api_max_retry"]:
-                    logging.error("Max retries exceeded. Terminating...")
-                    sys.exit()
-            logging.error(f"HTTP error: {e}")
+            error_count += 1
+            logging.error(f"Server error: {e} when calling {func.__name__}")
+            if error_count == config["rabbithole_api_max_retry"]:
+                logging.error("Max retries exceeded. Terminating...")
+                sys.exit()
         except requests.exceptions.RequestException as e:
             logging.error(f"Request error: {e}")
         return None
@@ -70,6 +68,16 @@ def update_user_profile(profile=None):
     url = f"{BASE_URL}/updateUserProfile"
     body = {"accessToken": RH_ACCESS_TOKEN, "profile": profile}
     return requests.patch(url, headers=headers, json=body)
+
+
+@handle_request_errors
+def fetch_user_entry_resource(urls):
+    '''
+    Fetches the resources for the given entry id 
+    '''
+    url = f"{BASE_URL}/fetchJournalEntryResources"
+    params = {"accessToken": RH_ACCESS_TOKEN, "urls": urls}
+    return requests.get(url, headers=headers, params=params)
 
 
 @handle_request_errors

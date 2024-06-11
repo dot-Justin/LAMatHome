@@ -323,7 +323,7 @@ def CombinedParse(context, text):
             else:
                 logging.error("Unknown LAMatHome command or the integration is not enabled.")
 
-    if integration == "telegram":
+    elif integration == "telegram":
         if config.config["telegram_isenabled"]:
             if config.config["telegramtext_isenabled"]:
                 telegram.TelegramText(context, recipient, message)

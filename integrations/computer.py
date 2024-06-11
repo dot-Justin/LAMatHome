@@ -11,7 +11,6 @@ from utils.config import config
 #      ComputerVolume      #
 ############################
 
-
 def is_mac():
     return platform.system() == "Darwin"
 
@@ -109,9 +108,6 @@ def ComputerVolume(title):
 computerrun_isenabled = True
 
 def ComputerRun(title):
-    if not computerrun_isenabled:
-        log_disabled_integration("ComputerRun")
-        return
 
     title_cleaned = re.sub(r'[^\w\s]', '', title).lower()
     words = title_cleaned.split()
@@ -120,8 +116,6 @@ def ComputerRun(title):
         return
 
     command = " ".join(words[2:])
-    print('command is:', command)
-
     if is_mac():
         try:
             subprocess.run(['open', '-a', f'{command}'])
@@ -158,9 +152,6 @@ def ComputerRun(title):
 computermedia_isenabled = True
 
 def ComputerMedia(title):
-    if not computermedia_isenabled:
-        log_disabled_integration("ComputerMedia")
-        return
 
     words = title.split()
     if len(words) < 3:
@@ -202,3 +193,85 @@ def ComputerMedia(title):
                 logging.error("Invalid prompt format for Computer Media command.")
         except Exception as e:
             logging.error(f"Failed to execute media command: {e}")
+
+#################################
+#        ComputerPower          #
+#################################
+
+def ComputerPower(title):
+    words = title.split()
+    if len(words) < 3:
+        logging.error("Invalid prompt format for Computer Power command.")
+        return
+    
+    action = words[2].lower()
+    logging.info(f"Action identified: {action}")
+
+    if is_mac():
+        try:
+            if action == "lock":
+                logging.info("Locking Mac...")
+                subprocess.run(['osascript', '-e', 'tell application "System Events" to keystroke "q" using {control down, command down}'])
+
+            elif action == "sleep":
+                logging.info("Putting Mac to sleep...")
+                subprocess.run(['osascript', '-e', 'tell application "System Events" to sleep'])
+
+            elif action == "restart":
+                logging.info("Restarting Mac...")
+                subprocess.run(['osascript', '-e', 'tell application "System Events" to restart'])
+
+            elif action == "shutdown":
+                logging.info("Shutting down Mac...")
+                subprocess.run(['osascript', '-e', 'tell application "System Events" to shut down'])
+            else:
+                logging.error(f"Unknown action: {action}")
+        except Exception as e:
+            logging.error(f"Failed to execute Mac command: {e}")
+
+    else:
+        try:
+            if action == "lock":
+                logging.info("Locking computer...")
+                ctypes.windll.user32.LockWorkStation()
+
+            elif action == "sleep":
+                logging.info("Putting computer to sleep...")
+                ctypes.windll.user32.keybd_event(0x5B, 0, 0, 0)  # win key down
+                ctypes.windll.user32.keybd_event(0x58, 0, 0, 0)  # x key down
+                ctypes.windll.user32.keybd_event(0x58, 0, 2, 0)  # x key up
+                ctypes.windll.user32.keybd_event(0x5B, 0, 2, 0)  # win key up
+                time.sleep(0.3)
+                ctypes.windll.user32.keybd_event(0x55, 0, 0, 0)  # u key down
+                ctypes.windll.user32.keybd_event(0x55, 0, 2, 0)  # u key up
+                time.sleep(0.3)
+                ctypes.windll.user32.keybd_event(0x53, 0, 0, 0)  # s key down
+                ctypes.windll.user32.keybd_event(0x53, 0, 2, 0)  # s key up
+
+            elif action == "restart":
+                logging.info("Restarting computer...")
+                ctypes.windll.user32.keybd_event(0x5B, 0, 0, 0)  # win key down
+                ctypes.windll.user32.keybd_event(0x58, 0, 0, 0)  # x key down
+                ctypes.windll.user32.keybd_event(0x58, 0, 2, 0)  # x key up
+                ctypes.windll.user32.keybd_event(0x5B, 0, 2, 0)  # win key up
+                ctypes.windll.user32.keybd_event(0x55, 0, 0, 0)  # u key down
+                ctypes.windll.user32.keybd_event(0x55, 0, 2, 0)  # u key up
+                ctypes.windll.user32.keybd_event(0x52, 0, 0, 0)  # r key down
+                ctypes.windll.user32.keybd_event(0x52, 0, 2, 0)  # r key up
+
+            elif action == "shutdown":
+                logging.info("Shutting down computer...")
+                ctypes.windll.user32.keybd_event(0x5B, 0, 0, 0)  # win key down
+                ctypes.windll.user32.keybd_event(0x58, 0, 0, 0)  # x key down
+                ctypes.windll.user32.keybd_event(0x58, 0, 2, 0)  # x key up
+                ctypes.windll.user32.keybd_event(0x5B, 0, 2, 0)  # win key up
+                ctypes.windll.user32.keybd_event(0x55, 0, 0, 0)  # u key down
+                ctypes.windll.user32.keybd_event(0x55, 0, 2, 0)  # u key up
+                ctypes.windll.user32.keybd_event(0x55, 0, 0, 0)  # u key down
+                ctypes.windll.user32.keybd_event(0x55, 0, 2, 0)  # u key up
+
+            else:
+                logging.error(f"Unknown action: {action}")
+
+        except Exception as e:
+            logging.error(f"Failed to execute Windows command: {e}")

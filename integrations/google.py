@@ -1,7 +1,10 @@
+import time
 import logging
 from utils.get_env import G_HOME_EMAIL, G_HOME_PASS
 
 def GoogleHome(page, automation):
+    timeoutamt = 30000  # Set a longer timeout
+
     """Opens Google home, logs in if necessary, and runs the automation."""
     session_file = "cache/state.json"
     context = page.context
@@ -10,8 +13,10 @@ def GoogleHome(page, automation):
     logging.info(f"Opening Google Home page: {page.url}")
     logging.info(f"Automation to run: {automation}")
 
-    # If not logged in
+    # Check if not logged in
+    first_login = False
     if page.url == "https://home.google.com/welcome/" or page.is_visible("text=From smart lights to smart locks"):
+        first_login = True
         logging.info("Not logged in, proceeding with login steps")
         page.wait_for_load_state('load')
         page.click("text=Go to Google Home")
@@ -33,14 +38,38 @@ def GoogleHome(page, automation):
             page.click("text=Not now")
             logging.info("Clicked 'Not now' for simplify sign-in prompt")
 
-        page.click("text=OK")
-        logging.info("Clicked 'OK' after logging in")
-        page.wait_for_load_state('load')
+    if first_login:
+        try:
+            time.sleep(2)
+            # page.wait_for_selector("label:has-text(\"Don't show again\")", timeout=300)
+            page.click("label:has-text(\"Don't show again\")")
+            logging.info("Clicked 'Don't show again' checkbox")
+        except Exception as e:
+            logging.info("No 'Don't show again' checkbox found or unable to click it within 0.3 seconds")
 
-    logging.info("Page is visible with 'OK' button")
+        try:
+            time.sleep(2)
+            # page.wait_for_selector("text=OK", timeout=300)
+            page.click("text=OK")
+            logging.info("Clicked 'OK' after logging in")
+        except Exception as e:
+            logging.info("No 'OK' button found or unable to click it within 0.3 seconds")
+
     page.wait_for_load_state('load')
-    page.click("text=OK")
-    logging.info("Clicked 'OK' button")
+
+    logging.info("Waiting for the automation section to load")
+
+    # Wait for the main content to load by waiting for a specific element that indicates the page is ready
+    try:
+        page.wait_for_selector(f"//div[contains(@class, 'automation-name') and normalize-space(text())='{automation}']", timeout=timeoutamt)
+        logging.info(f'Google Home "{automation}" section is visible')
+    except Exception as e:
+        logging.error(f'Google Home "{automation}" section is not available within the timeout period')
+        context.storage_state(path=session_file)
+        logging.info(f"Saved browser state to {session_file}")
+        page.close()
+        logging.info("Browser closed")
+        return
 
     # Locate the automation div and click the play button
     automation_div = page.locator(f"//div[contains(@class, 'automation-name') and normalize-space(text())='{automation}']").first
@@ -54,8 +83,9 @@ def GoogleHome(page, automation):
             logging.error(f'Play button for "{automation}" is not visible')
     else:
         logging.error(f'Google Home "{automation}" is not available')
-    
+
     context.storage_state(path=session_file)
     logging.info(f"Saved browser state to {session_file}")
     page.close()
     logging.info("Browser closed")
+    

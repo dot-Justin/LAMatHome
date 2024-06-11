@@ -17,15 +17,18 @@ def process_utterance(utterance, transcript, playwright_context):
     
     # iterate through tasks and execute each sequentially
     for task in tasks:
-        logging.info(f"Task: {task}")
-        llm_parse.CombinedParse(playwright_context, task)
+        if task != "x":
+            logging.info(f"Task: {task}")
+            llm_parse.CombinedParse(playwright_context, task)
 
-        # Append the completed interaction to the transcript
-        chat = {
-            "user prompt": utterance,
-            "LLM response": promptParsed
-        }
-        transcript.append(chat)
+            # Append the completed interaction to the transcript
+            chat = {
+                "user prompt": utterance,
+                "LLM response": promptParsed
+            }
+            transcript.append(chat)
+        else:
+            logging.error("LLMParse returned x. (Not determined to be a LAMatHome command, or insuffecient parameters.)")
 
 
 def main():

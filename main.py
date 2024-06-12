@@ -50,14 +50,6 @@ def main():
             with open(state_file, 'w') as f:
                 json.dump({}, f)
 
-        contact_file_path = config.config["contacts_file"]
-    
-        if os.path.exists(contact_file_path):
-            with open(contact_file_path, "r") as contacts_file:
-                content = contacts_file.read()
-                if content == "contacts = {}":
-                    ui.create_ui()
-        
         # Initialize journal for storing rolling transcript
         userJournal = journal.Journal(max_entries=config.config['rolling_transcript_size'])
 
@@ -96,20 +88,12 @@ def main():
 
 
 if __name__ == "__main__":
+    # configure logging and run LAMatHome
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-    
-    log_level_styles = {
-        'info': {'color': 'green'},
-        'debug': {'color': 'yellow'},
-        'error': {'color': 'red', 'bold': True},
-    }
-    
     coloredlogs.install(
         level='INFO', 
         fmt='%(asctime)s - %(levelname)s - %(message)s', 
         datefmt='%Y-%m-%d %H:%M:%S', 
-        field_styles={'asctime': {'color': 'white'}},
-        level_styles=log_level_styles
+        field_styles={'asctime': {'color': 'white'}}
     )
-    
     main()

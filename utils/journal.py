@@ -8,7 +8,7 @@ from urllib.parse import quote
 from collections import deque
 from dataclasses import dataclass, field
 from typing import List, Dict, Any, Union
-from .rabbithole import fetch_user_entry_resource
+from .rabbit_hole import fetch_user_entry_resource
 
 @dataclass
 class Entry:

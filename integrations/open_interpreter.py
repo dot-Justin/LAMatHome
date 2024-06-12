@@ -1,6 +1,6 @@
 from interpreter import interpreter
 import logging
-from utils import get_env, config
+from utils import config, get_env
 
 # set api base url based on config (valid options: groq, openai, or user set url)
 if config.config.get("openinterpreter_llm_api_base") in ["groq", "openai"]:

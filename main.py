@@ -3,7 +3,8 @@ import json
 import logging
 import coloredlogs
 from datetime import datetime, timezone
-from utils import config, ui, llm_parse, rabbithole, journal, splashscreen, get_env
+from integrations import lam_at_home
+from utils import config, get_env, rabbit_hole, splash_screen, ui, llm_parse, task_executor, journal
 from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
 
 
@@ -23,7 +24,7 @@ def process_utterance(journal_entry, journal: journal.Journal, playwright_contex
         for task in tasks:
             if task != "x":
                 logging.info(f"Task: {task}")
-                llm_parse.CombinedParse(playwright_context, task)
+                task_executor.execute_task(playwright_context, task)
 
         # Append the completed interaction to the journal
         journal.add_entry(journal_entry, llm_response=promptParsed)
@@ -37,7 +38,7 @@ def main():
         # Check if env file exists, if not run ui.py to create it
         if not os.path.exists(config.config["env_file"]):
             ui.create_ui()
-        print(splashscreen.colored_splash)
+        print(splash_screen.colored_splash)
         logging.info("LAMatHome is starting...")
 
         # create cache directory if it doesn't exist
@@ -61,14 +62,14 @@ def main():
             user, assistant = None, None
             if get_env.RH_ACCESS_TOKEN:
                 # fetch rabbit hole user profile
-                profile = rabbithole.fetch_user_profile()
+                profile = rabbit_hole.fetch_user_profile()
                 user = profile.get('name')
                 assistant = profile.get('assistantName')
             
             if config.config["mode"] == "rabbit":
                 currentTimeIso = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
                 logging.info(f"Welcome {user}! LAMatHome is now listening for journal entries posted by {assistant}")
-                for journal_entry in rabbithole.journal_entries_generator(currentTimeIso):
+                for journal_entry in rabbit_hole.journal_entries_generator(currentTimeIso):
                     process_utterance(journal_entry, userJournal, context)
             
             elif config.config["mode"] == "cli":
@@ -84,7 +85,7 @@ def main():
         print("\n")
         logging.info("Program terminated by user")
     finally:
-        print(splashscreen.colored_splash_goodbye)
+        lam_at_home.terminate()
 
 
 if __name__ == "__main__":

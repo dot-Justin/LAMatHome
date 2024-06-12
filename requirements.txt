@@ -4,4 +4,4 @@ coloredlogs
 tk
 requests
 groq
-openinterpreter
+open-interpreter

@@ -200,9 +200,6 @@ def LLMParse(user_prompt, transcript=None, temperature=0.1, top_p=1):
         raise ValueError(f"Failed to get response from API: {e}")
 
 
-import logging
-import string
-
 def CombinedParse(context, text):
     words = text.split()
     if len(words) < 3:

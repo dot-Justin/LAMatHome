@@ -23,6 +23,7 @@
 		"computervolume_isenabled": true,
 			"vol_up_step_value": 4,
 			"vol_down_step_value": 4,
+				"vol_step_value_comment": "This determines how many steps the volume up/down actions will take.",
 		"computerrun_isenabled": true,
 		"computermedia_isenabled": true,
 		"computerpower_isenabled": true,

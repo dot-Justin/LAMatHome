@@ -200,6 +200,9 @@ def LLMParse(user_prompt, transcript=None, temperature=0.1, top_p=1):
         raise ValueError(f"Failed to get response from API: {e}")
 
 
+import logging
+import string
+
 def CombinedParse(context, text):
     words = text.split()
     if len(words) < 3:
@@ -209,6 +212,7 @@ def CombinedParse(context, text):
     integration = words[0].strip('.,!?:;"').lower()
     recipient = None
     action = None
+    actions_list = ["site", "google", "youtube", "gmail", "amazon", "volume", "run", "media", "power", "terminate"]
 
     if integration in ['telegram', 'discord', 'facebook']:
         # Check for the combination of the second and third words
@@ -226,7 +230,10 @@ def CombinedParse(context, text):
                 recipient = name
                 message = ' '.join(words[2:]).strip()
             else:
-                action = single_recipient
+                if single_recipient in actions_list:
+                    action = single_recipient
+                else:
+                    recipient = single_recipient
                 message = ' '.join(words[2:]).strip()
     else:
         action = words[1].strip('.,!?:;"').lower()

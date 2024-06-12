@@ -3,7 +3,7 @@ import re
 import logging
 from groq import Groq
 from utils import get_env, config, helpers
-from integrations import google, telegram, computer, browser, discord, facebook, lamathome
+from integrations import browser, computer, discord, facebook, google, lamathome, openinterpreter, telegram
 
 
 def get_api_configuration():
@@ -81,6 +81,10 @@ def LLMParse(user_prompt, transcript=None, temperature=0.1, top_p=1):
             lamathome: lamathome [Command]
             Prompt from User: lamathome terminate (closes lamathome. This is the only lamathome integration.)
 
+            openinterpreter: openinterpreter [Command]
+            Prompt from User: Tell open interpreter to find the file on my desktop called file.txt, then send it to JohnDoe@gmail.com via gmail.
+            Parsed command: Openinterpreter Find the file on my desktop called file.txt, then send it to JohnDoe@gmail.com via gmail.
+
             # Instructions:
             Absolute Requirement for Messaging Commands: For messaging commands, ensure all three variables [Platform], [Name], and [Message] are present. If ANY piece is missing, respond with x.
             No Placeholders: Do not use placeholders (e.g., [Name], [Message]). If the recipient is ambiguous (e.g., "team", "my brother"), respond with x.
@@ -157,11 +161,13 @@ def LLMParse(user_prompt, transcript=None, temperature=0.1, top_p=1):
             ### Other
             Quit out of Lam at home → lamathome terminate
             Let's play LAMatHome roulette. → [Random integration] [Random action] [Random]
+            Use open interpreter to open the telegram app. → Openinterpreter Open the Telegram app.
             Turn off Lamb at home. → lamathome terminate
             Open two random websites. → Browser site [Pick a real, random website to open, including https://]&&Browser site [Another real, random website to open including https://]
             Open command prompt on my computer. → Computer run command prompt
             Let's play browser roulette. → Browser site [Pick a real, random website to open, including https://]
             Run Chrome on computer. → Computer run Chrome
+            Tell open interpreter to email John@gmail.com Aking about how his dog is doing since the accident. → Openinterpreter Email john@gmail.com How is your dog is doing since the accident?
             Launch calculator on my computer. → Computer run calculator
             """
         },
@@ -322,6 +328,17 @@ def CombinedParse(context, text):
                 lamathome.terminate()
             else:
                 logging.error("Unknown LAMatHome command or the integration is not enabled.")
+    
+    elif integration == "openinterpreter":
+        if not config.config["openinterpreter_isenabled"]:
+            helpers.log_disabled_integration("OpenInterpreter")
+            return
+
+        if config.config["openinterpreter_isenabled"]:
+            message_OI = ' '.join(words[1:]).strip()
+            openinterpreter.openinterpretercall(message_OI)
+        else:
+            logging.error("Unknown OpenInterpreter command or the integration is not enabled.")
 
     elif integration == "telegram":
         if config.config["telegram_isenabled"]:

@@ -38,7 +38,7 @@ def main():
         if not os.path.exists(config.config["env_file"]):
             ui.create_ui()
         print(splashscreen.colored_splash)
-        logging.info("LAMatHome has started!")
+        logging.info("LAMatHome is starting...")
 
         # create cache directory if it doesn't exist
         if not os.path.exists(config.config['cache_dir']):
@@ -67,7 +67,7 @@ def main():
             
             if config.config["mode"] == "rabbit":
                 currentTimeIso = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
-                logging.info(f"Welcome {user}! LAMatHome is now listening for journals posted by {assistant}")
+                logging.info(f"Welcome {user}! LAMatHome is now listening for journal entries posted by {assistant}")
                 for journal_entry in rabbithole.journal_entries_generator(currentTimeIso):
                     process_utterance(journal_entry, userJournal, context)
             
@@ -84,7 +84,7 @@ def main():
         print("\n")
         logging.info("Program terminated by user")
     finally:
-        logging.info("exiting...")
+        print(splashscreen.colored_splash_goodbye)
 
 
 if __name__ == "__main__":

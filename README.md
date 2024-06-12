@@ -61,6 +61,7 @@ Below is a list of our current integrations. This list is kept up-to-date.
 ||Media|Local Actions|Skips media next/back, pause/unpause.|`Pause on my pc`, `Skip twice backwards on my computer`|
 |❕|Power|Local Actions|Power options (Lock/Sleep/Restart/Shutdown)|`Shutdown my PC`, `Please lock my computer`|
 ||[Google Home](https://home.google.com)|Local Actions|Activates Google Home automations.|`Turn on my desk lamp`, `Use google home to turn on my lamp, but I forgot what it's called`|
+||Open Interpreter|Local Actions|Send commands to Open Interpreter|`Tell Open Interpreter to open the blender file on my desktop.`|
 ||LAMatHome|Local Actions|Only integration currently is "terminate", which closes LAH.|`That's enough from you. Close LAM at home.`|
 |⚠️|[Discord](https://discord.com)|Messaging|Sends a message on Discord to a specified person/channel.|`Text poke on discord asking when he's going to be back online. Wait, no ask him on telegram. Actually no, discord is good.`|
 |⚠️|[FB Messenger](https://messenger.com)|Messaging|Sends a message on FB Messenger to a specified person.|`Ask Justin what he thinks of my new sunglasses. Oh, send that on facebook.`|

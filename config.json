@@ -23,7 +23,6 @@
 		"computervolume_isenabled": true,
 			"vol_up_step_value": 4,
 			"vol_down_step_value": 4,
-				"vol_step_value_comment": "This determines how many steps the volume up/down actions will take.",
 		"computerrun_isenabled": true,
 		"computermedia_isenabled": true,
 		"computerpower_isenabled": true,
@@ -41,6 +40,16 @@
 
 	"lamathome_isenabled": true,
 		"lamathometerminate_isenabled": true,
+	
+	"openinterpreter_isenabled": true,
+		"openinterpreter_auto_run_isenabled": true,
+		"openinterpreter_verbose_mode_isenabled": "false",
+			"openinterpreter_verbose_mode_isenabled_comment": "Valid entries: 'true', 'false'. Must be a string for parsing in openinterpreter.py",
+		"openinterpreter_llm_api_base": "groq",
+			"openinterpreter_llm_api_base_comment": "Valid entries: 'groq', 'openai', your own api base url",
+		"openinterpreter_llm_api_key": "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",
+		"openinterpreter_llm_model": "llama3-8b-8192",
+		"openinterpreter_llm_temperature": 0.1,
 
 	"telegram_isenabled": true,
 		"telegramtext_isenabled": true

@@ -1,5 +1,5 @@
 import sys
-from utils.splashscreen import colored_splash_goodbye
+from utils.splash_screen import colored_splash_goodbye
 
 
 # Function to sys.exit to terminate LAH

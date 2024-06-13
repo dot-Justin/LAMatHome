@@ -4,6 +4,7 @@
 	"env_file": ".env",
 	"cache_dir": "cache",
 	"state_file": "state.json",
+	"debug": false,
 
 	"rabbithole_api_max_retry": 3,
 		"rabbithole_api_max_retry_comment": "This determines how many times LAMatHome will try to connect after failure.",

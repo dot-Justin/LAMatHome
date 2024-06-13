@@ -32,6 +32,9 @@ def process_utterance(journal_entry, journal: journal.Journal, playwright_contex
     except PlaywrightTimeoutError:
         logging.error("Playwright timed out while waiting for response.")
 
+    except Exception as e:
+        logging.error(f"An error occurred: {e}")
+
 
 def main():
     try:

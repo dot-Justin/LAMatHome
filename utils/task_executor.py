@@ -4,7 +4,7 @@ from integrations import browser, computer, discord, facebook, google, lam_at_ho
 
 def execute_task(context, text):
     words = text.split()
-    if len(words) < 3:
+    if len(words) < 2:
         logging.error("Command did not provide enough parameters.")
         return
     

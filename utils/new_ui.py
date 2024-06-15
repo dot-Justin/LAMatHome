@@ -206,7 +206,7 @@ def create_ui():
     # --- Style ---
 
         customtkinter.set_appearance_mode("dark")
-        customtkinter.set_default_color_theme("utils/rabbit-color.json")
+        customtkinter.set_default_color_theme("utils/rabbit_color.json")
 
         # --- Tabs ---
         tabview = customtkinter.CTkTabview(master=ui_instance)

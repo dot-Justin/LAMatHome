@@ -15,19 +15,26 @@ def process_utterance(journal_entry, journal: journal.Journal, playwright_contex
         utterance = journal_entry['utterance']['prompt']
     logging.info(f"Prompt: {utterance}")
 
+    entry, promptParsed = None, None
     try:
-        # split prompt into tasks
-        promptParsed = llm_parse.LLMParse(utterance, journal.get_interactions())
-        tasks = promptParsed.split("&&")
-        
-        # iterate through tasks and execute each sequentially
-        for task in tasks:
-            if task != "x":
-                logging.info(f"Task: {task}")
-                task_executor.execute_task(playwright_context, task)
+        if utterance:
+            # split prompt into tasks
+            promptParsed = llm_parse.LLMParse(utterance, journal.get_interactions())
+            tasks = promptParsed.split("&&")
+
+            # iterate through tasks and execute each sequentially
+            for task in tasks:
+                if task != "x":
+                    logging.info(f"Task: {task}")
+                    task_executor.execute_task(playwright_context, task)
+        else:
+            logging.info("No prompt found in entry, skipping LLM Parse and task execution.")
 
         # Append the completed interaction to the journal
-        journal.add_entry(journal_entry, llm_response=promptParsed)
+        entry = journal.add_entry(journal_entry, llm_response=promptParsed)
+
+        if config.config['lamathomesave_isenabled'] and entry.type in ["vision", "ai-generated-image"]:
+            lam_at_home.save(entry)
 
     except PlaywrightTimeoutError:
         logging.error("Playwright timed out while waiting for response.")

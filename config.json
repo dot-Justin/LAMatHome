@@ -1,10 +1,10 @@
 {
-	"mode": "rabbit",
+	"mode": "cli",
 		"mode_comment": "rabbbit/cli mode. rabbit mode will listen to the rabbithole api for journal entries, while cli mode will turn LAMatHome into a dumb OpenInterpreter.",
 	"env_file": ".env",
 	"cache_dir": "cache",
 	"state_file": "state.json",
-	"debug": false,
+	"debug": true,
 
 	"rabbithole_api_max_retry": 3,
 		"rabbithole_api_max_retry_comment": "This determines how many times LAMatHome will try to connect after failure.",

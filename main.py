@@ -3,7 +3,7 @@ import json
 import logging
 import coloredlogs
 from datetime import datetime, timezone
-from integrations import lam_at_home
+from integrations import lam_at_home_int
 from utils import config, get_env, rabbit_hole, splash_screen, ui, llm_parse, task_executor, journal
 from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
 
@@ -16,25 +16,20 @@ def process_utterance(journal_entry, journal: journal.Journal, playwright_contex
     logging.info(f"Prompt: {utterance}")
 
     try:
-        # split prompt into tasks
-        promptParsed = llm_parse.LLMParse(utterance, journal.get_interactions())
-        tasks = promptParsed.split("&&")
-        
-        # iterate through tasks and execute each sequentially
-        for task in tasks:
-            if task != "x":
-                logging.info(f"Task: {task}")
-                task_executor.execute_task(playwright_context, task)
+        # Send the utterance to the Groq API for parsing
+        parsed_command = llm_parse.LLMParse(utterance, journal.get_interactions())
+
+        # Execute the parsed command
+        task_executor.execute_command(parsed_command)
 
         # Append the completed interaction to the journal
-        journal.add_entry(journal_entry, llm_response=promptParsed)
+        journal.add_entry(journal_entry, llm_response=parsed_command)
 
     except PlaywrightTimeoutError:
         logging.error("Playwright timed out while waiting for response.")
 
     except Exception as e:
         logging.error(f"An error occurred: {e}")
-
 
 def main():
     try:
@@ -88,7 +83,7 @@ def main():
         print("\n")
         logging.info("Program terminated by user")
     finally:
-        lam_at_home.terminate()
+        lam_at_home_int.terminate()
 
 
 if __name__ == "__main__":

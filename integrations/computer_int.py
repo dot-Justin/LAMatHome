@@ -4,8 +4,10 @@ import ctypes
 import logging
 import subprocess
 import platform
-from utils.helpers import log_disabled_integration
 from utils.config import config
+
+def log_disabled_integration(integration):
+    logging.info(f"Attempted integration call, but {integration} is disabled.")
 
 ############################
 #      ComputerVolume      #
@@ -254,8 +256,10 @@ def ComputerPower(title):
                 ctypes.windll.user32.keybd_event(0x58, 0, 0, 0)  # x key down
                 ctypes.windll.user32.keybd_event(0x58, 0, 2, 0)  # x key up
                 ctypes.windll.user32.keybd_event(0x5B, 0, 2, 0)  # win key up
+                time.sleep(0.3)
                 ctypes.windll.user32.keybd_event(0x55, 0, 0, 0)  # u key down
                 ctypes.windll.user32.keybd_event(0x55, 0, 2, 0)  # u key up
+                time.sleep(0.3)
                 ctypes.windll.user32.keybd_event(0x52, 0, 0, 0)  # r key down
                 ctypes.windll.user32.keybd_event(0x52, 0, 2, 0)  # r key up
 
@@ -265,8 +269,10 @@ def ComputerPower(title):
                 ctypes.windll.user32.keybd_event(0x58, 0, 0, 0)  # x key down
                 ctypes.windll.user32.keybd_event(0x58, 0, 2, 0)  # x key up
                 ctypes.windll.user32.keybd_event(0x5B, 0, 2, 0)  # win key up
+                time.sleep(0.3)
                 ctypes.windll.user32.keybd_event(0x55, 0, 0, 0)  # u key down
                 ctypes.windll.user32.keybd_event(0x55, 0, 2, 0)  # u key up
+                time.sleep(0.3)
                 ctypes.windll.user32.keybd_event(0x55, 0, 0, 0)  # u key down
                 ctypes.windll.user32.keybd_event(0x55, 0, 2, 0)  # u key up
 

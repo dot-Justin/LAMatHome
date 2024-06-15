@@ -3,11 +3,12 @@ import urllib.parse
 import webbrowser
 import subprocess
 import platform
+import shlex
 import re
 from groq import Groq
 from utils import config, get_env
 
-integrationname = "browser_int"
+integration_name = "browser_int"
 
 def get_api_configuration():
     GROQ_API_KEY = get_env.GROQ_API_KEY
@@ -21,21 +22,23 @@ def handle_command(command_text, temperature=0.1, top_p=1):
     client = Groq(api_key=api_key)
 
     flags = parse_flags(command_text)
-    utterance = flags.get('--utterance')
     log_message = flags.get('--log')
 
     if log_message:
         logging.info(log_message)
-    
-    if not utterance:
-        logging.error("No utterance provided in the command.")
+
+    # Check for presence of any actionable flag
+    actionable_flags = {flag: value for flag, value in flags.items() if value is not None}
+    if not actionable_flags:
+        logging.error("No actionable flag provided in the command.")
         return
 
     messages = [
         {
             "role": "system",
-            "content": f"""
+            "content": """
             You are an advanced LLM specializing in intention triage and data parsing. You will receive a message from the user and need to respond with a relevant action in the form of a precise command based on the message. The commands you can use are:
+            You NEVER conversate with the user, you are strictly the backend converting the user message into a command.
 
             browser_int --site "https://site"
             Opens a specified website in the default browser.
@@ -75,12 +78,15 @@ def handle_command(command_text, temperature=0.1, top_p=1):
             Utterance: "Open a search on google for, I don't know, some random weird thing."
             Command: browser_int --google "purple watermelon"
             Note: Be creative with some commands that are ambiguous like this.
+
+            ### Other things to note:
+            Open links: You have the ability to open links in your default browser. If the user asks to open a link, open it. If the user asks to open a search on a specific website, attempt to do so. If you do not know the url structure for a site, cancel the command by simply outputting ""
             """
         },
         {
             "role": "user",
             "content": f"""
-            PROMPT TO RESPOND TO: {utterance}
+            PROMPT TO RESPOND TO: {command_text}
             """
         }
     ]
@@ -113,19 +119,15 @@ def handle_command(command_text, temperature=0.1, top_p=1):
         raise ValueError(f"Failed to get response from API: {e}")
 
 def parse_flags(command_text):
-    """
-    Parse the command flags from the command text.
-    """
-    import shlex
+    """Parse command flags from the command text."""
     parts = shlex.split(command_text)
     flags = {
-        '--utterance': None,
-        '--log': None,
         '--site': None,
         '--google': None,
         '--youtube': None,
         '--gmail': None,
-        '--amazon': None
+        '--amazon': None,
+        '--log': None
     }
     current_flag = None
     for part in parts:
@@ -138,32 +140,22 @@ def parse_flags(command_text):
 
 def execute_parsed_command(parsed_command):
     flags = parse_flags(parsed_command)
-    utterance = flags.get('--utterance')
-
-    if not utterance:
-        logging.error("No utterance provided in the parsed command.")
-        return
-
-    command_parts = utterance.split()
-    if not command_parts:
-        logging.error("No command provided in the utterance.")
-        return
-
-    command = command_parts[0].strip().lower()
-    message = ' '.join(command_parts[1:]).strip()
-
-    if command == "site":
-        BrowserSite(message)
-    elif command == "google":
-        BrowserGoogle(message)
-    elif command == "youtube":
-        BrowserYoutube(message)
-    elif command == "gmail":
-        BrowserGmail(message)
-    elif command == "amazon":
-        BrowserAmazon(message)
-    else:
-        logging.error(f"Unknown browser command: {command}")
+    
+    for flag, value in flags.items():
+        if value:
+            command = flag[2:].strip().lower()
+            if command == "site":
+                BrowserSite(value)
+            elif command == "google":
+                BrowserGoogle(value)
+            elif command == "youtube":
+                BrowserYoutube(value)
+            elif command == "gmail":
+                BrowserGmail(value)
+            elif command == "amazon":
+                BrowserAmazon(value)
+            else:
+                logging.error(f"Unknown {integration_name} command: {command}")
 
 ###############################
 #         BrowserSite         #

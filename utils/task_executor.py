@@ -3,15 +3,8 @@ import shlex
 from utils import config
 from integrations import browser_int, computer_int, discord_int, facebook_int, google_int, lam_at_home_int, open_interpreter_int, telegram_int
 
-def log_disabled_integration(integration):
-    if config.config["debug"]:
-        logging.info(f"Attempted integration call, but {integration} is disabled.")
-
-def parse_flags(utterance):
-    """
-    Parse the command flags from the utterance.
-    """
-    parts = shlex.split(utterance)
+def parse_flags(command_text):
+    parts = shlex.split(command_text)
     flags = {
         '--utterance': None,
         '--log': None
@@ -25,10 +18,10 @@ def parse_flags(utterance):
             current_flag = None
     return flags
 
-def execute_command(command_text):
+def execute_single_command(command_text):
     if config.config["debug"]:
         logging.info(f"Executing command: {command_text}")
-    
+
     flags = parse_flags(command_text)
     utterance = flags.get('--utterance')
     log_message = flags.get('--log')
@@ -37,49 +30,32 @@ def execute_command(command_text):
         logging.error("Command did not provide enough parameters.")
         return
 
-    # words = utterance.split()
-    # if len(words) < 1:
-    #     logging.error("Command did not provide enough parameters.")
-    #     return
-
-    command = command_text.split()[0]  # Fix the command extraction
-    logging.info(command)
-    message = flags.get('--utterance')  # Send the entire utterance to the integration module
+    command = command_text.split()[0]
+    logging.info(f"Command: {command}")
 
     if log_message:
         logging.info(log_message)
 
     if command == "browser_int":
-        browser_int.handle_command(utterance)
+        browser_int.handle_command(command_text)
     elif command == "computer_int":
-        computer_int.handle_command(utterance)
+        computer_int.handle_command(command_text)
     elif command == "discord_int":
-        discord_int.handle_command(utterance)
+        discord_int.handle_command(command_text)
     elif command == "facebook_int":
-        facebook_int.handle_command(utterance)
+        facebook_int.handle_command(command_text)
     elif command == "google_int":
-        google_int.handle_command(utterance)
+        google_int.handle_command(command_text)
     elif command == "lam_at_home_int":
-        lam_at_home_int.handle_command(utterance)
+        lam_at_home_int.handle_command(command_text)
     elif command == "open_interpreter_int":
-        open_interpreter_int.handle_command(utterance)
+        open_interpreter_int.handle_command(command_text)
     elif command == "telegram_int":
-        telegram_int.handle_command(utterance)
+        telegram_int.handle_command(command_text)
     else:
         logging.error(f"Unknown command type: {command}")
 
-def execute_task(context, utterance):
-    if config.config["debug"]:
-        logging.info(f"Received task: {utterance}")
-    
-    commands = utterance.split('&&')
-    
-    if config.config["debug"]:
-        logging.info(f"Parsed commands: {commands}")
-    
+def execute_command(command_text):
+    commands = command_text.split('&&')
     for command in commands:
-        if command:
-            execute_command(command)
-
-    if config.config["debug"]:
-        logging.info("Task execution completed.")
+        execute_single_command(command.strip())

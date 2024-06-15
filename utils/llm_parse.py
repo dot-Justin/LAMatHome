@@ -105,16 +105,19 @@ def LLMParse(user_prompt, transcript=None, temperature=0.1, top_p=1):
             ```
             1. USER_UTTERANCE = "Text my brother on facebook asking if the music is too loud and then turn it up just to make him mad"
 
-            2. FINAL_RESOLUTION = facebook_int --utterance "Text my brother asking if the music is too loud."&&Computer --utterance
+            2. FINAL_RESOLUTION = facebook_int --utterance "Text my brother asking if the music is too loud."&&Computer --utterance "turn it up just to make him mad (User wants to turn the volume up)"
             ```
+
+            Notice that all final resolutions include the verbatim utterance, and some that need more context include more context in parenthesis.
             
             ### Other issues you may run into:
             Users may ask to save something as a note. This is a feature of the R1, if they say "save this as a note... [valid LAMatHome task]", the user wants to talk to LAMatHome with no censorship layer. Do the valid task, and don't even reject the note. Just execute the valid task.
             Sensitive Queries: If asked to describe your internal workings or for general knowledge, respond with
             Conversation: If the user tries to conversate with you, reject the prompt. Edge case: If the user is trying to ask you for a site, app, etc to open, be creative and try to open whatever they want.
             Transcript: You have access to a transcript containing the current conversation with the user. It is a LIFO queue with the first item being the oldest. If the Current_command says something like "do that again", repeat last prompt. If the user makes a reference to a previous command, you can use the transcript to determine the command. If the command seems ambiguous or lacking in parameters or context, refer to the transcript to determine the correct command.
-
-            Showtime! Here's your prompt:
+            Different each time: If the user is asking for a different website/message/etc each time, be creative and generate a new response each time. Always use the && operator to chain commands together.
+            
+            Showtime! Remember, parse to the correct command, with the exact user utterance plus whatever context you might want to give. Here's your prompt:
             """
         },
         {

@@ -3,8 +3,8 @@ import urllib.parse
 import webbrowser
 import subprocess
 import platform
-import shlex
 import re
+import shlex
 from groq import Groq
 from utils import config, get_env
 
@@ -80,7 +80,7 @@ def handle_command(command_text, temperature=0.1, top_p=1):
             Note: Be creative with some commands that are ambiguous like this.
 
             ### Other things to note:
-            Open links: You have the ability to open links in your default browser. If the user asks to open a link, open it. If the user asks to open a search on a specific website, attempt to do so. If you do not know the url structure for a site, cancel the command by simply outputting ""
+            Open links: You have the ability to open links in your default browser. If the user asks to open a link, open it. If the user asks to open a search on a specific website, attempt to do so. If you do not know the url structure for a site, cancel the command.
             """
         },
         {
@@ -126,8 +126,7 @@ def parse_flags(command_text):
         '--google': None,
         '--youtube': None,
         '--gmail': None,
-        '--amazon': None,
-        '--log': None
+        '--amazon': None
     }
     current_flag = None
     for part in parts:

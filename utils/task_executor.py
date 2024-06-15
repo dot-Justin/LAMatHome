@@ -33,9 +33,6 @@ def execute_single_command(command_text):
     command = command_text.split()[0]
     logging.info(f"Command: {command}")
 
-    if log_message:
-        logging.info(log_message)
-
     if command == "browser_int":
         browser_int.handle_command(command_text)
     elif command == "computer_int":

@@ -40,11 +40,14 @@ def start_drag(event):
     y_offset = event.y
 
 def do_drag(event):
-    x = root.winfo_pointerx() - x_offset
-    y = root.winfo_pointery() - y_offset
-    root.geometry(f"+{x}+{y}")
+    try:
+        x = root.winfo_pointerx() - x_offset
+        y = root.winfo_pointery() - y_offset
+        root.geometry(f"+{x}+{y}")
+    except NameError:
+        pass
 
-def process_utterance(journal_entry, user_journal, playwright_context):
+def process_utterance(journal_entry, journal: journal.Journal, playwright_context):
     if isinstance(journal_entry, str):
         utterance = journal_entry
     else:
@@ -151,14 +154,19 @@ if __name__ == "__main__":
         field_styles={'asctime': {'color': 'white'}}
     )
     
+    customtkinter.set_appearance_mode("dark")
+    customtkinter.set_default_color_theme("utils/rabbit_color.json")
     root = customtkinter.CTk()
     root.title("LAMatHome Control")
 
     # Remove window decorations
     root.overrideredirect(True)
+    
+    root.bind("<Button-1>", start_drag)
+    root.bind("<B1-Motion>", do_drag)
 
     # Set the window background to be transparent
-    root.attributes('-transparentcolor', root['bg'])
+    root.attributes('-alpha', 0.9999)
 
     # Load the image
     image_path = "assets/LAH_splash.png"
@@ -190,33 +198,25 @@ if __name__ == "__main__":
 
     # Create the button with the image and transparent background
     toggle_button = customtkinter.CTkButton(master=root, image=ctk_image, text="", command=toggle_ui, fg_color="#161B22", border_color="#ff4d06", border_width=1, hover_color="#ff4d06", corner_radius=8)
-    toggle_button.pack(padx=0, pady=0)
+    toggle_button.pack(padx=15, pady=15)  # Adding padding to ensure button isn't touching the edges
 
     # Adjust the button size to match the image size
     toggle_button.configure(width=new_width, height=new_height)
 
-    # Adjust the window size to match the button size
-    root.geometry(f"{new_width}x{new_height + 80}")  # Adjust height to accommodate the start/stop buttons
-
-    x = (screen_width) - (new_width // 2)
-    y = (screen_height) - (new_height // 2)
-    root.geometry(f"+{x}+{y}")
-
-    # Bind mouse events to make the window draggable
-    toggle_button.bind("<Button-1>", start_drag)
-    toggle_button.bind("<B1-Motion>", do_drag)
-
-    # Frame to hold start/stop buttons
-    button_frame = customtkinter.CTkFrame(master=root, fg_color="#161B22")
-    button_frame.pack(pady=(10, 0))
+    # Frame to hold start/stop buttons with black background
+    button_frame = customtkinter.CTkFrame(master=root)
+    button_frame.pack(pady=10, padx=10)
 
     # Add a start button to the UI
-    start_button = customtkinter.CTkButton(master=button_frame, text="Start", command=run_main_in_thread, fg_color="#161B22", border_color="#ff4d06", border_width=1, hover_color="#ff4d06", corner_radius=8)
+    start_button = customtkinter.CTkButton(master=button_frame, text="Start", command=run_main_in_thread, fg_color="#161B22", border_color="#ff4d06", border_width=1, hover_color="#ff4d06", corner_radius=8, bg_color="#000000")
     start_button.pack(side="left", padx=(5, 5))
 
     # Add a stop button to the UI
-    stop_button = customtkinter.CTkButton(master=button_frame, text="Stop", command=stop_main_thread, fg_color="#161B22", border_color="#ff4d06", border_width=1, hover_color="#ff4d06", corner_radius=8)
+    stop_button = customtkinter.CTkButton(master=button_frame, text="Stop", command=stop_main_thread, fg_color="#161B22", border_color="#ff4d06", border_width=1, hover_color="#ff4d06", corner_radius=8, bg_color="#000000")
     stop_button.pack(side="left", padx=(5, 5))
 
     # Start the GUI event loop
     root.mainloop()
+
+
+main()

@@ -1,8 +1,8 @@
 import json
 import os
-from dotenv import load_dotenv, set_key, dotenv_values
+from dotenv import set_key, dotenv_values
 import customtkinter
-import tkinter as tk
+from contacts import contacts
 
 # --- Colors ---
 PRIMARY_COLOR = "#ff4d06"
@@ -10,6 +10,8 @@ SECONDARY_COLOR = "#000000"
 
 CONFIG_FILE = "config.json"
 CREDENTIALS_FILE = ".env"
+
+CONTACTS_FILE = 'contacts.py'
 
 # --- Config File Handling ---
 def load_config():
@@ -43,6 +45,16 @@ def save_credentials(credentials):
     for key, value in credentials.items():
         set_key(dotenv_path=CREDENTIALS_FILE, key_to_set=key, value_to_set=value)
 
+def save_contacts(contacts):
+    try:
+        with open(CONTACTS_FILE, 'w') as f:
+            f.write(f"contacts = {json.dumps(contacts, indent=4)}")
+        print(f"Contacts saved to {CONTACTS_FILE}")
+    except OSError as e:
+        print(f"Error creating directory: {e}")
+
+
+    
 # --- Load Initial Data ---
 config = load_config()
 credentials = load_credentials()
@@ -94,9 +106,9 @@ class ToolTip:
 
 def create_integration_frame(parent_tab, title):
     frame = customtkinter.CTkFrame(master=parent_tab)
-    frame.pack(pady=10, padx=10, fill="both", expand=True)
+    frame.pack(pady=5, padx=10, fill="both", expand=True)
     label = customtkinter.CTkLabel(master=frame, text=title, font=("Power Grotesk", 22))
-    label.pack(pady=(0, 5))
+    label.pack(pady=2)
     return frame
 
 def create_toggle(parent, key, text, tooltip_text=None):
@@ -134,6 +146,7 @@ def create_input(parent, key, placeholder, tooltip_text=None):
         update_config(key, entry.get())
 
     entry.bind("<FocusOut>", update_entry)
+    entry.bind("<Return>", update_entry)
     if tooltip_text:
         ToolTip(entry, tooltip_text)
         
@@ -168,13 +181,37 @@ def create_slider(parent, key, from_, to_, text, tooltip_text=None):
     label.pack(pady=(5, 0), anchor="w")
 
     def update_slider(value):
-        update_config(key, float(value))
+        # Convert the value to float with two decimal places
+        formatted_value = float("{:.2f}".format(float(value)))
+        update_config(key, formatted_value)
+        label.configure(text=f"Current Value: {formatted_value}")
 
+    # Ensure the value in config is correctly set as float
+    initial_value = float(config.get(key, 0.1))
+    
     slider = customtkinter.CTkSlider(master=parent, from_=from_, to=to_, command=update_slider)
     slider.pack(pady=2, fill="x")
-    slider.set(config.get(key, 0.1))  # Set initial value from config
+    slider.set(initial_value)  # Set initial value from config
+
     if tooltip_text:
         ToolTip(slider, tooltip_text)
+
+
+def create_integer_slider(parent, key, text, tooltip_text=None):
+    label = customtkinter.CTkLabel(master=parent, text=text)
+    label.pack(pady=(5, 0), anchor="w")
+
+    def update_slider(value):
+        update_config(key, int(value))
+        label.configure(text=f"Current Value: {int(slider.get())}")
+
+    slider = customtkinter.CTkSlider(master=parent, from_=1, to=30, command=update_slider)
+    slider.pack(pady=2, fill="x")
+    slider.set(config.get(key, 1))  # Set initial value from config
+    if tooltip_text:
+        ToolTip(slider, tooltip_text)
+        
+
 
 # --- UI Setup ---
 
@@ -190,7 +227,6 @@ def create_ui():
     global ui_instance
     if ui_instance is None or not ui_instance.winfo_exists():
         ui_instance = customtkinter.CTk()
-        
         screen_width = ui_instance.winfo_screenwidth()
         screen_height = ui_instance.winfo_screenheight()
         
@@ -213,6 +249,7 @@ def create_ui():
         tabview.pack(pady=10, padx=10, fill="both", expand=True)
         tabview.add("Configuration")
         tabview.add("Credentials")
+        tabview.add('Contacts')
 
         # --- Configuration Tab ---
         config_tab = tabview.tab("Configuration")
@@ -224,6 +261,27 @@ def create_ui():
         # --- Mode Toggle ---
         mode_frame = create_integration_frame(scrollable_frame, "Mode Selection")
         create_mode_toggle(mode_frame, "mode", "Rabbit Mode", "Toggle between Rabbit mode and CLI mode")
+       
+        
+        lamathome_save_path_frame = create_integration_frame(scrollable_frame, "Lam at Home Save Path")
+        save_path_entry = customtkinter.CTkEntry(master=lamathome_save_path_frame, placeholder_text="eg: ~/Pictures/LAMatHome")
+        save_path_entry.pack(pady=2, padx=4, fill="x")
+        save_path_entry.insert(0, config.get("lamathomesave_path", ""))
+        ToolTip(save_path_entry, "This is the path to the folder that will store journal resources.")
+        create_toggle(lamathome_save_path_frame, "lamathomesave_isenabled", "Enable Magic Cam AutoSave", "Enable or disable Autosave integration")
+        
+        def update_save_path(event=None):
+            updated_path = save_path_entry.get()
+            if updated_path.startswith("~/"):
+                update_config("lamathomesave_path", updated_path)
+            elif not updated_path.startswith("~/"):
+                save_path_entry.insert(0, "~/")
+
+        save_path_entry.bind("<FocusOut>", update_save_path)
+        save_path_entry.bind("<Return>", update_save_path)
+
+
+
 
         # --- Google Integration ---
         google_frame = create_integration_frame(scrollable_frame, "Google Integration")
@@ -277,5 +335,74 @@ def create_ui():
 
         reminder_label = customtkinter.CTkLabel(master=scrollable_frame_credentials, text="Press Enter after inputing the last value to ensure you save it.")
         reminder_label.pack(pady=10, padx=11, anchor="w")
+        
+        tabview.add("Customization")
 
+        # --- Customization Tab ---
+        customization_tab = tabview.tab("Customization")
+        create_integer_slider(customization_tab, "vol_up_step_value", "Volume Up Step Value", "Step value for volume increase")
+        create_integer_slider(customization_tab, "vol_down_step_value", "Volume Down Step Value", "Step value for volume decrease")
+        create_integer_slider(customization_tab, "rolling_transcript_size", "Rolling Transcript Size", "Number of entries in rolling transcript")
+        create_integer_slider(customization_tab, "rabbithole_api_max_retry", "Rabbithole API Max Retry", "Maximum retry attempts for Rabbithole API")
+
+        # --- Contacts Tab ---
+        contacts_tab = tabview.tab("Contacts")
+
+        scrollable_frame = customtkinter.CTkScrollableFrame(master=contacts_tab)
+        scrollable_frame.pack(pady=2, padx=10, fill='both', expand=True)
+
+        def create_contact_frame(platform):
+            frame = create_integration_frame(scrollable_frame, f"{platform.capitalize()} Contacts")
+            entry_name = customtkinter.CTkEntry(master=frame, placeholder_text=f"Add {platform} contact name")
+            entry_name.pack(pady=2, padx=4, fill="x")
+
+            entry_nicknames = customtkinter.CTkEntry(master=frame, placeholder_text=f"Add {platform} contact nicknames (comma-separated)")
+            entry_nicknames.pack(pady=2, padx=4, fill="x")
+
+            add_button = customtkinter.CTkButton(master=frame, text="Add", command=lambda: add_contact(platform, entry_name.get(), entry_nicknames.get()))
+            add_button.pack(pady=2, padx=4, anchor="w")
+
+            contacts_list = customtkinter.CTkScrollableFrame(master=frame)
+            contacts_list.pack(pady=2, padx=4, fill="both", expand=True)
+
+            def update_contacts_list():
+                for widget in contacts_list.winfo_children():
+                    widget.destroy()
+                for contact in contacts[platform]:
+                    contact_frame = customtkinter.CTkFrame(master=contacts_list)
+                    contact_frame.pack(pady=2, padx=4, fill="x")
+                    label = customtkinter.CTkLabel(master=contact_frame, text=f"Name: {contact['name']}, Nicknames: {', '.join(contact['nicknames'])}")
+                    label.pack(side="left", pady=2, padx=4)
+                    delete_button = customtkinter.CTkButton(master=contact_frame, text="Delete", command=lambda c=contact: delete_contact(platform, c))
+                    delete_button.pack(side="right", pady=2, padx=4)
+
+            def add_contact(platform, name, nicknames):
+                if name:
+                    nicknames_list = [nickname.strip() for nickname in nicknames.split(',')]
+                    contact_found = False
+                    for contact in contacts[platform]:
+                        if contact["name"].lower() == name.lower():
+                            contact["nicknames"] = nicknames_list
+                            contact_found = True
+                            break
+                    if not contact_found:
+                        contacts[platform].append({"name": name, "nicknames": nicknames_list})
+                    save_contacts(contacts)
+                    update_contacts_list()
+
+            def delete_contact(platform, contact):
+                if contact in contacts[platform]:
+                    contacts[platform].remove(contact)
+                    save_contacts(contacts)
+                    update_contacts_list()
+
+            update_contacts_list()
+
+        for platform in contacts.keys():
+            create_contact_frame(platform)
+
+
+
+        ui_instance.mainloop()
+        
         return ui_instance

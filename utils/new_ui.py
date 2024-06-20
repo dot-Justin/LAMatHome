@@ -1,18 +1,31 @@
 import json
 import os
-from dotenv import set_key, dotenv_values
+import sys
+import platform
+import ctypes
+import Xlib.display
 import customtkinter
+import logging
+import threading
+import _tkinter
+from tkinter import PhotoImage
+from PIL import Image, ImageTk
 from contacts import contacts
+from dotenv import set_key, dotenv_values
+from customtkinter import CTkImage
+from utils import splash_screen
+from main import main
 
-# --- Colors ---
 PRIMARY_COLOR = "#ff4d06"
-SECONDARY_COLOR = "#000000"
-
 CONFIG_FILE = "config.json"
 CREDENTIALS_FILE = ".env"
-
 CONTACTS_FILE = 'contacts.py'
-
+ui_instance = None
+ui_window = None
+main_thread = None
+stop_event = threading.Event()
+x_offset = 0
+y_offset = 0
 # --- Config File Handling ---
 def load_config():
     try:
@@ -24,7 +37,6 @@ def load_config():
 def save_config(config):
     with open(CONFIG_FILE, "w") as f:
         json.dump(config, f, indent=4)
-
 # --- Credentials File Handling ---
 def load_env():
     try:
@@ -52,13 +64,9 @@ def save_contacts(contacts):
         print(f"Contacts saved to {CONTACTS_FILE}")
     except OSError as e:
         print(f"Error creating directory: {e}")
-
-
-    
 # --- Load Initial Data ---
 config = load_config()
 credentials = load_credentials()
-
 # --- UI Functions ---
 def update_config(key, value):
     config[key] = value
@@ -66,8 +74,7 @@ def update_config(key, value):
 
 def update_credentials(key, value):
     credentials[key] = value
-    save_credentials(credentials)
-    
+    save_credentials(credentials) 
 # --- Tooltip Class ---
 class ToolTip:
     current_tooltip = None  # Class variable to keep track of the current tooltip
@@ -196,7 +203,6 @@ def create_slider(parent, key, from_, to_, text, tooltip_text=None):
     if tooltip_text:
         ToolTip(slider, tooltip_text)
 
-
 def create_integer_slider(parent, key, text, tooltip_text=None):
     label = customtkinter.CTkLabel(master=parent, text=text)
     label.pack(pady=(5, 0), anchor="w")
@@ -210,19 +216,172 @@ def create_integer_slider(parent, key, text, tooltip_text=None):
     slider.set(config.get(key, 1))  # Set initial value from config
     if tooltip_text:
         ToolTip(slider, tooltip_text)
-        
 
+def get_screen_size():
+    system = platform.system()
+    if system == 'Windows':
+        return get_screen_size_windows()
+    elif system == 'Darwin':  # macOS
+        return get_screen_size_macos()
+    elif system == 'Linux':
+        return get_screen_size_linux()
+    else:
+        return None, None  # Handle other platforms as needed
 
+def get_screen_size_windows():
+    user32 = ctypes.windll.user32
+    return user32.GetSystemMetrics(0), user32.GetSystemMetrics(1)
+
+def get_screen_size_macos():
+    from AppKit import NSScreen, NSRect
+    main_screen = NSScreen.mainScreen().frame()
+    return int(main_screen.size.width), int(main_screen.size.height)
+
+def get_screen_size_linux():
+    display = Xlib.display.Display()
+    screen = display.screen()
+    return screen.width_in_pixels, screen.height_in_pixels
+
+def toggle_ui():
+    global ui_window
+    try:
+        if ui_window is None or not ui_window.winfo_exists():
+            ui_window = create_ui()
+        else:
+            if ui_window.state() == 'withdrawn':
+                ui_window.deiconify()
+            else:
+                ui_window.withdraw()
+    except _tkinter.TclError as e:
+        ui_window = None
+
+def start_drag(event):
+    global x_offset, y_offset
+    x_offset = event.x
+    y_offset = event.y
+
+def do_drag(event):
+    try:
+        x = root.winfo_pointerx() - x_offset
+        y = root.winfo_pointery() - y_offset
+        root.geometry(f"+{x}+{y}")
+    except NameError:
+        pass
+
+def run_main_in_thread():
+    global main_thread
+    stop_event.clear()
+    main_thread = threading.Thread(target=main)
+    main_thread.start()
+
+def stop_main_thread():
+    stop_event.set()
+    print(splash_screen.colored_splash_goodbye)
+    os.kill(os.getpid(), 2)  # Send SIGINT signal to simulate Ctrl+C
+
+# def get_python_command():
+#     if sys.executable.endswith("python.exe"):
+#         return "python"
+#     elif sys.executable.endswith("python3"):
+#         return "python3"
+#     else:
+#         return "py"
+
+def restart_program():
+    print(splash_screen.colored_splash_goodbye)
+    root.destroy()
+    os.execv(sys.executable, [sys.executable] + [os.path.join(os.getcwd(), "main.py")])
+    
+def popup():
+    customtkinter.set_appearance_mode("dark")
+    customtkinter.set_default_color_theme("utils/rabbit_color.json")
+    global root
+    root = customtkinter.CTk()
+    root.title("LAMatHome")
+    root.iconbitmap('assets/favicon.ico')
+    global icon
+    
+    root.bind("<Button-1>", start_drag)
+    root.bind("<B1-Motion>", do_drag)
+
+    # Set the window background to be transparent
+    root.attributes('-alpha', 0.97)
+
+    # Load the image
+    image_path = "assets/LAH_splash.png"
+    try:
+        image = Image.open(image_path)
+    except FileNotFoundError:
+        logging.error(f"Image not found at {image_path}")
+        root.destroy()
+        exit()
+
+    # Get screen dimensions
+    screen_width, screen_height = get_screen_size()
+
+    # Calculate maximum allowed dimensions (20% of screen size)
+    max_width = int(screen_width * 0.25)
+    max_height = int(screen_height * 0.25)
+
+    # Resize the image if it exceeds the maximum allowed dimensions
+    image_width, image_height = image.size
+    if image_width > max_width or image_height > max_height:
+        scaling_factor = min(max_width / image_width, max_height / image_height)
+        new_width = int((image_width * scaling_factor) * 1.2)
+        new_height = int((image_height * scaling_factor) * 1.2)
+        image = image.resize((new_width , new_height), Image.LANCZOS)
+    else:
+        new_width, new_height = image_width, image_height
+
+    # Convert the image to a CTkImage
+    ctk_image = CTkImage(light_image=image, dark_image=image, size=(new_width, new_height))
+
+    # Create the button with the image and transparent background
+    toggle_button = customtkinter.CTkButton(master=root, image=ctk_image, text="", command=toggle_ui, fg_color="#161B22", border_color="#ff4d06", border_width=1, hover_color="#ff4d06", corner_radius=8)
+    toggle_button.pack(padx=15, pady=15)  # Adding padding to ensure button isn't touching the edges
+
+    # Adjust the button size to match the image size
+    toggle_button.configure(width=new_width, height=new_height)
+    
+    # Calculate the space required for buttons
+    button_frame_height = 50  # Adjust this based on your button sizes and padding
+
+    # Calculate the total height needed for the image and button frame
+    total_height = new_height + button_frame_height + 40
+
+    # Calculate the position to center the window
+    x_position = (screen_width - new_width) // 2
+    y_position = (screen_height - total_height) // 2
+    
+    root.geometry(f"{new_width}x{total_height}+{x_position}+{y_position}")
+
+    # Frame to hold start/stop buttons with black background
+    button_frame = customtkinter.CTkFrame(master=root)
+    button_frame.pack(pady=10, padx=10)
+
+    # Add a start button to the UI
+    start_button = customtkinter.CTkButton(master=button_frame, text="Start", command=run_main_in_thread, fg_color="#161B22", border_color="#ff4d06", border_width=1, hover_color="#ff4d06", corner_radius=8, bg_color="#000000")
+    start_button.pack(side="left", padx=(5, 5))
+
+    # Add a stop button to the UI
+    stop_button = customtkinter.CTkButton(master=button_frame, text="Stop", command=stop_main_thread, fg_color="#161B22", border_color="#ff4d06", border_width=1, hover_color="#ff4d06", corner_radius=8, bg_color="#000000")
+    stop_button.pack(side="left", padx=(5, 5))
+
+    # Add a restart button to the UI
+    restart_button = customtkinter.CTkButton(master=button_frame, text="Restart", command=restart_program, fg_color="#161B22", border_color="#ff4d06", border_width=1, hover_color="#ff4d06", corner_radius=8, bg_color="#000000")
+    restart_button.pack(side="left", padx=(5, 5))
+
+    # Start the GUI event loop
+    root.mainloop()
+    main()
 # --- UI Setup ---
-
-ui_instance = None
 
 def on_closing():
     global ui_instance
     ui_instance.destroy()
     ui_instance = None
 
-
+        
 def create_ui():
     global ui_instance
     if ui_instance is None or not ui_instance.winfo_exists():
@@ -235,7 +394,7 @@ def create_ui():
         
         ui_instance.minsize(width=min_width, height=min_height)
         ui_instance.state('normal')  
-        ui_instance.title("LAMatHOME")
+        ui_instance.title("LAMatHome")
         
         ui_instance.protocol("WM_DELETE_WINDOW", on_closing)
 
@@ -263,7 +422,7 @@ def create_ui():
         create_mode_toggle(mode_frame, "mode", "Rabbit Mode", "Toggle between Rabbit mode and CLI mode")
        
         
-        lamathome_save_path_frame = create_integration_frame(scrollable_frame, "Lam at Home Save Path")
+        lamathome_save_path_frame = create_integration_frame(scrollable_frame, "LAMatHome Save Path")
         save_path_entry = customtkinter.CTkEntry(master=lamathome_save_path_frame, placeholder_text="eg: ~/Pictures/LAMatHome")
         save_path_entry.pack(pady=2, padx=4, fill="x")
         save_path_entry.insert(0, config.get("lamathomesave_path", ""))
@@ -289,10 +448,10 @@ def create_ui():
         create_toggle(google_frame, "googlehome_isenabled", "Enable Google Home", "Enable or disable Google Home integration")
         create_input(google_frame, "googlehomeautomations", "Google Home Automations (comma-separated)", "Comma-separated list of Google Home automations")
 
-        # --- Lam at Home Integration ---
-        lamathome_frame = create_integration_frame(scrollable_frame, "LamatHome Integration")
-        create_toggle(lamathome_frame, "lamathome_isenabled", "Enable LamatHome", "Enable or disable LamatHome integration")
-        create_toggle(lamathome_frame, "lamathometerminate_isenabled", "Enable LamatHome Termination", "Enable or disable LamatHome termination")
+        # --- LAMatHomee Integration ---
+        lamathome_frame = create_integration_frame(scrollable_frame, "LAMatHome Integration")
+        create_toggle(lamathome_frame, "lamathome_isenabled", "Enable LAMatHome", "Enable or disable LAMatHome integration")
+        create_toggle(lamathome_frame, "lamathometerminate_isenabled", "Enable LAMatHome Termination", "Enable or disable LAMatHome termination")
 
         # --- Open Interpreter Integration ---
         openinterpreter_frame = create_integration_frame(scrollable_frame, "Open Interpreter Integration")

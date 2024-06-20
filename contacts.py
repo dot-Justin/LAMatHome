@@ -1,5 +1,5 @@
 contacts = {
     "facebook": [],
     "telegram": [],
-    "discord": []
+    "discord": [],
 }

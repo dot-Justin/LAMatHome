@@ -117,7 +117,6 @@ cd LAMatHome
 pip install -r requirements.txt
 playwright install
 ```
-```
 **3. Obtaining your user token from [the rabbithole](https://hole.rabbit.tech/journal/details):**
 
 - *Google Chrome*
@@ -163,8 +162,9 @@ When you want to run LAMatHome, do the following:
 
 Run `main.py` from the root directory
 
-`py main.py`
+```
 
+`py main.py`
 
 ```
 
@@ -191,7 +191,7 @@ Run `main.py` from the root directory
 
 ### Stopping LAMatHome
 ---
-```
+
 
 To stop LAMatHome, you have three options.
 1. Via r1 voice prompt (If you can't get this to work, try method 2)

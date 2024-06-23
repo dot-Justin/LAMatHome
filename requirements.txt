@@ -7,3 +7,4 @@ groq
 open-interpreter
 customtkinter
 pillow
+xlib

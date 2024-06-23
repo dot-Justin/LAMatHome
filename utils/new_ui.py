@@ -8,6 +8,7 @@ import customtkinter
 import logging
 import threading
 import _tkinter
+import tkinter
 from tkinter import PhotoImage
 from PIL import Image, ImageTk
 from contacts import contacts

@@ -8,3 +8,4 @@ open-interpreter
 customtkinter
 pillow
 xlib
+pyobjc

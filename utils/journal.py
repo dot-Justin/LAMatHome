@@ -1,111 +1,74 @@
-import os
 import uuid
 import json
 import requests
-import datetime
+import os
 import logging
-from urllib.parse import quote
+from datetime import datetime, timezone
 from collections import deque
-from dataclasses import dataclass, field
-from typing import List, Dict, Any, Union
+from typing import Dict, Any, Type, Union, Optional
+from pydantic import BaseModel, Field, field_validator
 from utils import config, rabbit_hole
 
+# Ensure logging is configured to display messages
+logging.basicConfig(level=logging.INFO)
 
-@dataclass
-class Entry:
-    _id: str
+
+class Entry(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()), alias='_id')
     userId: str
-    createdOn: datetime.datetime
-    modifiedOn: datetime.datetime
+    createdOn: datetime
+    modifiedOn: datetime
     archived: bool
     type: str
     title: str
     data: Dict[str, Any]
     utterance: Dict[str, str]
 
-
-    def __post_init__(self):
-        # Convert ISO 8601 string to datetime
-        self.createdOn = self._convert_to_datetime(self.createdOn)
-        self.modifiedOn = self._convert_to_datetime(self.modifiedOn)
-    
-
-    @staticmethod
-    def _convert_to_datetime(date_str: str) -> datetime.datetime:
+    @field_validator('createdOn', 'modifiedOn', mode='before')
+    def convert_to_datetime(cls, value: str) -> datetime:
         try:
-            return datetime.datetime.fromisoformat(date_str.replace('Z', '+00:00'))
+            return datetime.fromisoformat(value.replace('Z', '+00:00'))
         except ValueError:
-            raise ValueError(f"Invalid date format: {date_str}")
+            raise ValueError(f"Invalid date format: {value}")
+
+    class Config:
+        extra = 'ignore'
+        populate_by_name = True
 
 
-    def get_data(self) -> Dict[str, Any]:
-        return self.data
-
-
-    def set_data(self, new_data: Dict[str, Any]):
-        self.data = new_data
-
-
-@dataclass
-class SearchEntry(Entry):
-    pass
-
-
-@dataclass
-class ConversationEntry(Entry):
-    pass
-
-
-@dataclass
-class NoteEntry(Entry):
-    pass
-
-
-@dataclass
 class ImageEntry(Entry):
-    data: dict
-
+    data: Dict[str, Any]
 
     def get_resource_urls(self):
-        '''
-        Returns a list of file URLs, if any, for the given entry.
-        '''
         for key in ['aiGeneratedImageData', 'visionData']:
             if key in self.data:
                 return [file.get('url') for file in self.data[key].get('files', []) if file.get('url')]
         return []
-    
 
-    def get_signed_resource_urls(self) -> List[str]:
-        '''
-        Returns a list of signed URLs, if any, for the given entry.
-        '''
-        response = rabbit_hole.fetch_user_entry_resource(json.dumps(self.get_resource_urls()))
-        return response.get('resources', [])
+    def get_signed_resource_urls(self) -> list:
+        try:
+            response = rabbit_hole.fetch_user_entry_resource(json.dumps(self.get_resource_urls()))
+            return response.get('resources', [])
+        except Exception as e:
+            logging.error(f"Failed to fetch signed resource URLs: {e}")
+            return []
 
-
-    def save_resources(self, directory: str):
-        '''
-        Saves the files for the given entry, if any, to the specified directory.
-        '''
+    def save_resources(self, directory: str) -> list:
         urls = self.get_resource_urls()
-        signed_urls = rabbit_hole.fetch_user_entry_resource(json.dumps(urls))
+        signed_urls = self.get_signed_resource_urls()
 
         saved_files = []
-        for idx, resource_url in enumerate(signed_urls['resources']):
+        for idx, resource_url in enumerate(signed_urls):
             try:
-                # fetch resource
                 response = requests.get(resource_url)
                 response.raise_for_status()
 
-                # write file to disk
-                save_name = self._id + "_" + urls[idx].split('/')[-1]
+                save_name = self.id + "_" + urls[idx].split('/')[-1]
                 save_path = os.path.join(directory, save_name)
                 with open(save_path, 'wb+') as file:
                     file.write(response.content)
                 saved_files.append(save_path)
 
-                # log success
                 save_path = save_path.replace("/", "\\")
                 logging.info(f"Saved image to {save_path}")
 
@@ -114,18 +77,49 @@ class ImageEntry(Entry):
 
             except Exception as e:
                 logging.error(f"Failed to save resource: {e}")
-        
+
         return saved_files
 
 
-@dataclass
 class AiGeneratedImageEntry(ImageEntry):
     pass
 
 
-@dataclass
 class VisionEntry(ImageEntry):
     pass
+
+
+class NoteEntry(Entry):
+    pass
+
+
+class ConversationEntry(Entry):
+    pass
+
+
+class SearchEntry(Entry):
+    pass
+
+
+class SearchMemoryEntry(Entry):
+    pass
+
+
+# Map entry types to their corresponding classes
+entry_type_mapping = {
+    'image': ImageEntry,
+    'ai-generated-image': AiGeneratedImageEntry,
+    'vision': VisionEntry,
+    'note': NoteEntry,
+    'conversation': ConversationEntry,
+    'search': SearchEntry,
+    'search-memory': SearchMemoryEntry
+}
+
+def create_entry_model(entry_data: Dict[str, Any]) -> Entry:
+    entry_type = entry_data.get('type')
+    EntryModel = entry_type_mapping.get(entry_type, Entry)
+    return EntryModel(**entry_data)
 
 
 class Journal:
@@ -133,32 +127,32 @@ class Journal:
         self.entries = deque(maxlen=max_entries)
         self.interactions = deque(maxlen=max_entries)
 
-
-    def add_entry(self, entry_data: Union[Dict[str, Any], str], llm_response: str = None) -> Union[Entry, None]:
+    def add_entry(self, entry_data: Union[Dict[str, Any], str], llm_response: str = None) -> Optional[Entry]:
         '''
         Adds an entry to the journal.
         '''
         if isinstance(entry_data, str):
             entry_data = self._create_basic_entry(entry_data)
-        
+
         try:
             entry = self._create_entry(entry_data)
-            self.entries.append(entry)
-            if llm_response:
-                self._add_interaction(entry, llm_response)
+            if entry:  # Only add if entry is not None
+                self._log_debug(f"Entry created successfully: {entry}")
+                self.entries.append(entry)
+                if llm_response:
+                    self._add_interaction(entry, llm_response)
             return entry
-        
-        except (TypeError, ValueError) as e:
-            print(f"Failed to instantiate entry: {e}")
 
-    
+        except (TypeError, ValueError) as e:
+            logging.error(f"Failed to instantiate entry: {e}")
+            return None
 
     def _create_basic_entry(self, user_input: str) -> Dict[str, Any]:
         return {
             "_id": str(uuid.uuid1()),
             "userId": "local_user",
-            "createdOn": datetime.datetime.now(datetime.timezone.utc).isoformat(),
-            "modifiedOn": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            "createdOn": datetime.now(timezone.utc).isoformat(),
+            "modifiedOn": datetime.now(timezone.utc).isoformat(),
             "archived": False,
             "type": "conversation",
             "title": "CLI Input",
@@ -166,72 +160,64 @@ class Journal:
             "utterance": {"prompt": user_input, "intention": "CONVERSATION"}
         }
 
-    def _create_entry(self, entry_data: Dict[str, Any]) -> Entry:
-        entry_type = entry_data['type']
-        if entry_type == 'search':
-            return SearchEntry(**entry_data)
-        elif entry_type == 'conversation':
-            return ConversationEntry(**entry_data)
-        elif entry_type == 'ai-generated-image':
-            return AiGeneratedImageEntry(**entry_data)
-        elif entry_type == 'vision':
-            return VisionEntry(**entry_data)
-        elif entry_type == 'note':
-            return NoteEntry(**entry_data)
-        else:
-            raise ValueError(f"Unknown entry type: {entry_type}")
+    def _create_entry(self, entry_data: Dict[str, Any]) -> Optional[Entry]:
+        entry_type = entry_data.get('type')
+        entry_class: Type[Entry] = entry_type_mapping.get(entry_type)
 
+        if entry_class is not None:
+            self._log_debug(f"Creating entry of type: {entry_type}")
+            try:
+                entry = entry_class(**entry_data)
+                return entry
+            except Exception as e:
+                logging.error(f"Error creating entry of type {entry_type}: {e}")
+                return None
+        else:
+            self._log_debug(f"Unknown entry type: {entry_type}, skipping entry creation.")
+            return None
 
     def _add_interaction(self, entry: Entry, llm_response: str):
         interaction = {
-            "_id": entry._id,
+            "_id": entry.id,
             "user prompt": entry.utterance['prompt'],
             "LLM response": llm_response
         }
         self.interactions.append(interaction)
 
+    def _log_debug(self, message: str):
+        if config.config.get("debug", False):
+            logging.info(message)
 
-    def last_entry(self) -> Union[Entry, None]:
-        if self.entries:
-            return self.entries[-1]
-        return None
+    def last_entry(self) -> Optional[Entry]:
+        return self.entries[-1] if self.entries else None
 
-
-    def get_entries(self) -> List[Entry]:
+    def get_entries(self) -> list:
         return list(self.entries)
 
-
-    def get_entry_by_id(self, entry_id: str) -> Union[Entry, None]:
+    def get_entry_by_id(self, entry_id: str) -> Optional[Entry]:
         for entry in self.entries:
-            if entry._id == entry_id:
+            if entry.id == entry_id:
                 return entry
         return None
-    
 
-    def get_entry_by_index(self, index: int) -> Union[Entry, None]:
+    def get_entry_by_index(self, index: int) -> Optional[Entry]:
         if 0 <= index < len(self.entries):
             return self.entries[index]
         return None
-    
 
-    def last_interaction(self) -> Union[Dict[str, str], None]:
-        if self.interactions:
-            return self.interactions[-1]
-        return None
-    
+    def last_interaction(self) -> Optional[Dict[str, str]]:
+        return self.interactions[-1] if self.interactions else None
 
-    def get_interactions(self) -> List[Dict[str, str]]:
+    def get_interactions(self) -> list:
         return list(self.interactions)
-    
 
-    def get_interaction_by_id(self, entry_id: str) -> Union[Dict[str, str], None]:
+    def get_interaction_by_id(self, entry_id: str) -> Optional[Dict[str, str]]:
         for interaction in self.interactions:
             if interaction['_id'] == entry_id:
                 return interaction
         return None
 
-
-    def get_interaction_by_index(self, index: int) -> Union[Dict[str, str], None]:
+    def get_interaction_by_index(self, index: int) -> Optional[Dict[str, str]]:
         if 0 <= index < len(self.interactions):
             return self.interactions[index]
         return None

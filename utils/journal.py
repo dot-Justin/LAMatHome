@@ -1,7 +1,7 @@
+import os
 import uuid
 import json
 import requests
-import os
 import logging
 from datetime import datetime, timezone
 from collections import deque
@@ -36,58 +36,24 @@ class Entry(BaseModel):
         populate_by_name = True
 
 
-class ImageEntry(Entry):
-    data: Dict[str, Any]
-
+class VisionEntry(Entry):
     def get_resource_urls(self):
-        for key in ['aiGeneratedImageData', 'visionData']:
-            if key in self.data:
-                return [file.get('url') for file in self.data[key].get('files', []) if file.get('url')]
+        if "visionData" in self.data:
+            return [file.get('url') for file in self.data['visionData'].get('files', []) if file.get('url')]
         return []
 
-    def get_signed_resource_urls(self) -> list:
-        try:
-            response = rabbit_hole.fetch_user_entry_resource(json.dumps(self.get_resource_urls()))
-            return response.get('resources', [])
-        except Exception as e:
-            logging.error(f"Failed to fetch signed resource URLs: {e}")
-            return []
 
-    def save_resources(self, directory: str) -> list:
-        urls = self.get_resource_urls()
-        signed_urls = self.get_signed_resource_urls()
+class MagicCamEntry(Entry):
+    def get_resource_urls(self):
+        if "magicCameraData" in self.data:
+            return [file.get('url') for file in self.data['magicCameraData'].get('aiGeneratedImages', []) if file.get('url')]
+        return []
 
-        saved_files = []
-        for idx, resource_url in enumerate(signed_urls):
-            try:
-                response = requests.get(resource_url)
-                response.raise_for_status()
-
-                save_name = self.id + "_" + urls[idx].split('/')[-1]
-                save_path = os.path.join(directory, save_name)
-                with open(save_path, 'wb+') as file:
-                    file.write(response.content)
-                saved_files.append(save_path)
-
-                save_path = save_path.replace("/", "\\")
-                logging.info(f"Saved image to {save_path}")
-
-            except requests.RequestException as e:
-                logging.error(f"Failed to download image from {resource_url}: {e}")
-
-            except Exception as e:
-                logging.error(f"Failed to save resource: {e}")
-
-        return saved_files
-
-
-class AiGeneratedImageEntry(ImageEntry):
-    pass
-
-
-class VisionEntry(ImageEntry):
-    pass
-
+class AiGeneratedImageEntry(Entry):
+    def get_resource_urls(self):
+        if "aiGeneratedImageData" in self.data:
+            return [file.get('url') for file in self.data['aiGeneratedImageData'].get('files', []) if file.get('url')]
+        return []
 
 class NoteEntry(Entry):
     pass
@@ -107,8 +73,8 @@ class SearchMemoryEntry(Entry):
 
 # Map entry types to their corresponding classes
 entry_type_mapping = {
-    'image': ImageEntry,
     'ai-generated-image': AiGeneratedImageEntry,
+    'magic-camera': MagicCamEntry,
     'vision': VisionEntry,
     'note': NoteEntry,
     'conversation': ConversationEntry,
@@ -137,7 +103,7 @@ class Journal:
         try:
             entry = self._create_entry(entry_data)
             if entry:  # Only add if entry is not None
-                self._log_debug(f"Entry created successfully: {entry}")
+                self._log_debug(f"Entry created successfully:\n{entry.model_dump_json()}")
                 self.entries.append(entry)
                 if llm_response:
                     self._add_interaction(entry, llm_response)
@@ -173,14 +139,50 @@ class Journal:
                 logging.error(f"Error creating entry of type {entry_type}: {e}")
                 return None
         else:
-            self._log_debug(f"Unknown entry type: {entry_type}, skipping entry creation.")
-            return None
+            raise ValueError(f"Unknown entry type: {entry_type}")
+        
+    def get_signed_resource_urls(self, entry: Union[MagicCamEntry, VisionEntry]) -> list:
+        try:
+            response = rabbit_hole.fetch_user_entry_resource(json.dumps(entry.get_resource_urls()))
+            return response.get('resources', [])
+        except Exception as e:
+            logging.error(f"Failed to fetch signed resource URLs: {e}")
+            return []
 
-    def _add_interaction(self, entry: Entry, llm_response: str):
+    def save_resources(self, entry: Union[MagicCamEntry, VisionEntry, AiGeneratedImageEntry], directory: str) -> list:
+        urls = entry.get_resource_urls()
+        signed_urls = self.get_signed_resource_urls(entry)
+
+        saved_files = []
+        for idx, resource_url in enumerate(signed_urls):
+            try:
+                response = requests.get(resource_url)
+                response.raise_for_status()
+
+                save_name = entry.id + "_" + urls[idx].split('/')[-1]
+                save_path = os.path.join(directory, save_name)
+                with open(save_path, 'wb+') as file:
+                    file.write(response.content)
+
+                # log success and add to saved files list
+                save_path = save_path.replace("/", "\\")
+                saved_files.append(save_path)
+                logging.info(f"Saved image to {save_path}")
+
+            except requests.RequestException as e:
+                logging.error(f"Failed to download image from {resource_url}: {e}")
+
+            except Exception as e:
+                logging.error(f"Failed to save resource: {e}")
+
+        return saved_files
+
+    def _add_interaction(self, entry: Entry, task_response: str):
         interaction = {
             "_id": entry.id,
-            "user prompt": entry.utterance['prompt'],
-            "LLM response": llm_response
+            "date": entry.createdOn,
+            "user utterance": entry.utterance['prompt'],
+            "LAH action": task_response,
         }
         self.interactions.append(interaction)
 

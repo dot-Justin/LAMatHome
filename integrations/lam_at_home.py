@@ -4,7 +4,7 @@ import logging
 from utils import splash_screen, config, journal
 
 
-def save(entry: journal.Entry) -> None:
+def save(user_journal: journal.Journal, entry: journal.Entry) -> None:
     '''
     Save the given entry's resources to disk.
     '''
@@ -14,7 +14,20 @@ def save(entry: journal.Entry) -> None:
             # resolve save path
             save_path = config.config['lamathomesave_path']
             save_path = os.path.expanduser(save_path)
-            save_path = os.path.expandvars(save_path)
+            
+            # Split the path into components using os.path.split
+            path_components = []
+            while True:
+                save_path, tail = os.path.split(save_path)
+                if tail:
+                    path_components.insert(0, tail)
+                else:
+                    if save_path:
+                        path_components.insert(0, save_path)
+                    break
+            
+            # Join the path components using os.path.join
+            save_path = os.path.join(*path_components)
             
             # Ensure the directory exists
             if not os.path.exists(save_path):
@@ -25,7 +38,7 @@ def save(entry: journal.Entry) -> None:
                     # Fallback to cache directory if creation fails
                     save_path = os.path.expandvars(config.config['cache_dir'])
             
-            entry.save_resources(save_path)
+            user_journal.save_resources(entry, save_path)
 
 
 def terminate() -> None:

@@ -43,8 +43,8 @@
 	"lamathome_isenabled": true,
 		"lamathometerminate_isenabled": true,
 		"lamathomesave_isenabled": false,
-			"lamathomesave_types": ["vision", "ai-generated-image"],
-				"lamathomesave_types_comment": "The above types are the only types that will be stored. types avilable: vision, ai-generated-image.",
+			"lamathomesave_types": ["vision", "magic-camera", "ai-generated-image"],
+				"lamathomesave_types_comment": "The above types are the only types that will be stored. types avilable: vision, magic-camera, ai-generated-image",
 			"lamathomesave_path": "~/Pictures/LAMatHome",
 				"lamathomesave_path_comment": "This is the path to the folder that will store journal resources.",
 	

@@ -33,8 +33,8 @@ def process_utterance(journal_entry, journal: journal.Journal, playwright_contex
         # Append the completed interaction to the journal
         entry = journal.add_entry(journal_entry, llm_response=promptParsed)
 
-        if config.config['lamathomesave_isenabled'] and entry.type in ["vision", "ai-generated-image"]:
-            lam_at_home.save(entry)
+        if config.config['lamathomesave_isenabled'] and entry.type in config.config['lamathomesave_types']:
+            lam_at_home.save(journal, entry)
 
     except PlaywrightTimeoutError:
         logging.error("Playwright timed out while waiting for response.")
